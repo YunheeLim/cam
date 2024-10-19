@@ -100,9 +100,7 @@ const VideoCall = () => {
       ],
     });
 
-    pcRef.current.onicegatheringstatechange = () => {
-      console.log('ICE gathering state: ', pcRef.current?.iceGatheringState);
-    };
+    getMedia();
 
     socketRef.current.on('all_users', (allUsers: Array<{ id: string }>) => {
       if (allUsers.length > 0) {
@@ -116,7 +114,7 @@ const VideoCall = () => {
     });
 
     socketRef.current.on('getAnswer', (sdp: RTCSessionDescription) => {
-      console.log('recv Answer');
+      console.log('recv Answer', pcRef.current);
       if (!pcRef.current) {
         return;
       }
@@ -135,8 +133,6 @@ const VideoCall = () => {
     socketRef.current.emit('join_room', {
       room: roomName,
     });
-
-    getMedia();
 
     return () => {
       if (socketRef.current) {
