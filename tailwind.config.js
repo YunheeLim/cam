@@ -16,6 +16,9 @@ module.exports = {
       fontFamily: {
         pretendard: ['var(--font-pretendard)', 'sans-serif'],
       },
+      screens: {
+        xs: '360px',
+      },
     },
   },
   plugins: [],

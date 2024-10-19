@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr" className={`${pretendard.variable}`}>
-      <body className={`${pretendard.variable} h-screen`}>
+      <body className={`${pretendard.variable} h-screen flex flex-col`}>
         <div className="h-24 px-8 flex flex-row justify-between items-center">
           <div className="flex">
             <Logo />
@@ -33,7 +33,7 @@ export default function RootLayout({
             <Profile />
           </button>
         </div>
-        <div className="h-full">{children}</div>
+        <div className="flex h-full w-full">{children}</div>
       </body>
     </html>
   );
