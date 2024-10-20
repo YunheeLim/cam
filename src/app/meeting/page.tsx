@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+// import { useParams } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import io from 'socket.io-client';
 
 const VideoCall = () => {
-  const socketRef = useRef<Socket>();
+  const socketRef = useRef<typeof Socket>();
   const myVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const pcRef = useRef<RTCPeerConnection>();
