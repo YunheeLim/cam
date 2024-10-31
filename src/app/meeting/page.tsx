@@ -1,83 +1,84 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from 'react';
-import { OpenVidu, Publisher, Session, StreamManager } from 'openvidu-browser';
+import React, { useEffect, useState } from 'react';
+import { OpenVidu, Session, Publisher } from 'openvidu-browser';
 import axios from 'axios';
-import UserVideoComponent from './UserVideoComponent';
 
-const APPLICATION_SERVER_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000/';
+// OpenVidu global variables
+let OVCamera: any;
+let OVScreen: any;
+let sessionCamera: Session;
+let sessionScreen: Session;
 
-const Meeting: React.FC = () => {
-    const [mySessionId, setMySessionId] = useState('SessionA');
-    const [myUserName, setMyUserName] = useState('Participant' + Math.floor(Math.random() * 100));
-    const [session, setSession] = useState<Session | undefined>(undefined);
-    const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
-    const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
-    const [subscribers, setSubscribers] = useState<StreamManager[]>([]);
-    const [subscribersScreen, setSubscribersScreen] = useState<StreamManager[]>([]);
+// User name and session name global variables
+let myUserName: string;
+let mySessionId: string;
+let screensharing = false;
 
-    const [currentVideoDevice, setCurrentVideoDevice] = useState<MediaDeviceInfo | undefined>(undefined);
-    let OV: OpenVidu | null = null;
-    let OVScreen: OpenVidu | null = null;
+const APPLICATION_SERVER_URL = "http://localhost:5000/";
+
+const App: React.FC = () => {
+    const [sessionId, setSessionId] = useState<string>('SessionScreenA');
+    const [userName, setUserName] = useState<string>(`Participant${Math.floor(Math.random() * 100)}`);
+    const [subscribers, setSubscribers] = useState<any[]>([]);
 
     useEffect(() => {
-        const handleBeforeUnload = () => leaveSession();
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [session]);
-
-    const handleChangeSessionId = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMySessionId(e.target.value);
-    };
-
-    const handleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMyUserName(e.target.value);
-    };
-
-    const handleMainVideoStream = (stream: StreamManager) => {
-        if (mainStreamManager !== stream) {
-            setMainStreamManager(stream as Publisher);
-        }
-    };
-
-    const deleteSubscriber = (streamManager: StreamManager) => {
-        setSubscribers((prevSubscribers) =>
-            prevSubscribers.filter((subscriber) => subscriber !== streamManager)
-        );
-    };
+        generateParticipantInfo();
+    }, []);
 
     const joinSession = async () => {
-        OV = new OpenVidu();
+        mySessionId = sessionId;
+        myUserName = userName;
+
+        // --- 1) Create two OpenVidu objects.
+        OVCamera = new OpenVidu();
         OVScreen = new OpenVidu();
 
-        const newSession = OV.initSession();
-        const screenSession = OVScreen.initSession();
+        // --- 2) Init two OpenVidu Session Objects ---
+        sessionCamera = OVCamera.initSession();
+        sessionScreen = OVScreen.initSession();
 
-
-        newSession.on('streamCreated', (event) => {
-            if (event.stream.typeOfVideo == "CAMERA") {
-                const subscriber = newSession.subscribe(event.stream, 'container-cameras');
-                setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
+        // --- 3) Specify the actions when events of type 'streamCreated' take place in the session. ---
+        sessionCamera.on('streamCreated', (event: any) => {
+            if (event.stream.typeOfVideo === "CAMERA") {
+                const subscriber = sessionCamera.subscribe(event.stream, 'container-cameras');
+                subscriber.on('videoElementCreated', (event: any) => {
+                    appendUserData(event.element, subscriber.stream.connection);
+                });
             }
-
         });
 
-        newSession.on('streamDestroyed', (event) => {
-            deleteSubscriber(event.stream.streamManager);
+        sessionScreen.on('streamCreated', (event: any) => {
+            if (event.stream.typeOfVideo === "SCREEN") {
+                const existingSubscriber = subscribers.find(sub => sub.stream.streamId === event.stream.streamId);
+                if (!existingSubscriber) {
+                    const subscriberScreen = sessionScreen.subscribe(event.stream, 'container-screens');
+                    subscriberScreen.on('videoElementCreated', (event: any) => {
+                        appendUserData(event.element, subscriberScreen.stream.connection);
+                    });
+                    setSubscribers((prevSubscribers) => [...prevSubscribers, subscriberScreen]);
+                }
+            }
         });
 
-        newSession.on('exception', (exception) => {
+        sessionCamera.on('streamDestroyed', (event: any) => {
+            removeUserData(event.stream.connection);
+        });
+
+        sessionCamera.on('exception', (exception: any) => {
             console.warn(exception);
         });
 
+        // --- 4) Connect to the session with two different tokens: one for the camera and other for the screen ---
         try {
-            const token = await getToken();
-            await newSession.connect(token, { clientData: myUserName });
+            const token = await getToken(mySessionId);
+            await sessionCamera.connect(token, { clientData: myUserName });
 
-            const newPublisher = await OV.initPublisherAsync(undefined, {
+            document.getElementById('session-title')!.innerText = mySessionId;
+            document.getElementById('join')!.style.display = 'none';
+            document.getElementById('session')!.style.display = 'block';
+
+            const publisher = OVCamera.initPublisher('container-cameras', {
                 audioSource: undefined,
                 videoSource: undefined,
                 publishAudio: true,
@@ -85,67 +86,118 @@ const Meeting: React.FC = () => {
                 resolution: '640x480',
                 frameRate: 30,
                 insertMode: 'APPEND',
-                mirror: false,
+                mirror: false
             });
 
-            newSession.publish(newPublisher);
+            publisher.on('videoElementCreated', (event: any) => {
+                initMainVideo(event.element, myUserName);
+                appendUserData(event.element, myUserName);
+                event.element['muted'] = true;
+            });
 
-            const devices = await OV.getDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            const currentVideoDeviceId = newPublisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-            const currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
-
-            setSession(newSession);
-            setMainStreamManager(newPublisher);
-            setPublisher(newPublisher);
-            setCurrentVideoDevice(currentVideoDevice as MediaDeviceInfo | undefined);
+            sessionCamera.publish(publisher);
         } catch (error) {
-            console.log('Error connecting to the session:', error);
+            console.log('There was an error connecting to the session:', error);
         }
+
+        try {
+            const tokenScreen = await getToken(mySessionId);
+            await sessionScreen.connect(tokenScreen, { clientData: myUserName });
+            document.getElementById('buttonScreenShare')!.classList.remove('hidden');
+            console.log("Session screen connected");
+        } catch (error) {
+            console.warn('There was an error connecting to the session for screen share:', error);
+        }
+    };
+
+    const publishScreenShare = () => {
+        const publisherScreen = OVScreen.initPublisher("container-screens", { videoSource: "screen" });
+
+        publisherScreen.once('accessAllowed', () => {
+            document.getElementById('buttonScreenShare')!.classList.add('hidden');
+            screensharing = true;
+            publisherScreen.stream.getMediaStream().getVideoTracks()[0].addEventListener('ended', () => {
+                console.log('User pressed the "Stop sharing" button');
+                sessionScreen.unpublish(publisherScreen);
+                document.getElementById('buttonScreenShare')!.classList.remove('hidden');
+                screensharing = false;
+            });
+            sessionScreen.publish(publisherScreen);
+        });
+
+        publisherScreen.on('videoElementCreated', (event: any) => {
+            appendUserData(event.element, sessionScreen.connection);
+            event.element['muted'] = true;
+        });
+
+        publisherScreen.once('accessDenied', () => {
+            console.error('Screen Share: Access Denied');
+        });
     };
 
     const leaveSession = () => {
-        if (session) {
-            session.disconnect();
-        }
-        OV = null;
-        setSession(undefined);
-        setSubscribers([]);
-        setMySessionId('SessionA');
-        setMyUserName('Participant' + Math.floor(Math.random() * 100));
-        setMainStreamManager(undefined);
-        setPublisher(undefined);
+        sessionScreen.disconnect();
+        sessionCamera.disconnect();
+        removeAllUserData();
+        document.getElementById('join')!.style.display = 'block';
+        document.getElementById('session')!.style.display = 'none';
+        screensharing = false;
     };
 
-    const switchCamera = async () => {
-        if (OV && currentVideoDevice) {
-            try {
-                const devices = await OV.getDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                const newVideoDevice = videoDevices.find(device => device.deviceId !== currentVideoDevice.deviceId) as MediaDeviceInfo | undefined;
+    const generateParticipantInfo = () => {
+        setSessionId('SessionScreenA');
+        setUserName(`Participant${Math.floor(Math.random() * 100)}`);
+    };
 
-                if (newVideoDevice && session && mainStreamManager) {
-                    const newPublisher = OV.initPublisher(undefined, {
-                        videoSource: newVideoDevice.deviceId,
-                        publishAudio: true,
-                        publishVideo: true,
-                        mirror: true,
-                    });
-
-                    // Ensure mainStreamManager is a Publisher before unpublishing
-                    if (mainStreamManager instanceof Publisher) {
-                        await session.unpublish(mainStreamManager);
-                    }
-                    await session.publish(newPublisher);
-
-                    setCurrentVideoDevice(newVideoDevice);
-                    setMainStreamManager(newPublisher);
-                    setPublisher(newPublisher);
-                }
-            } catch (e) {
-                console.error(e);
-            }
+    const appendUserData = (videoElement: HTMLElement, connection: any) => {
+        let userData: string;
+        let nodeId: string;
+        if (typeof connection === "string") {
+            userData = connection;
+            nodeId = connection;
+        } else {
+            userData = JSON.parse(connection.data).clientData;
+            nodeId = connection.connectionId;
         }
+        const dataNode = document.createElement('div');
+        dataNode.className = "data-node";
+        dataNode.id = "data-" + nodeId;
+        dataNode.innerHTML = "<p>" + userData + "</p>";
+        videoElement.parentNode!.insertBefore(dataNode, videoElement.nextSibling);
+        addClickListener(videoElement, userData);
+    };
+
+    const removeUserData = (connection: any) => {
+        const dataNodeToRemove = document.getElementById("data-" + connection.connectionId);
+        if (dataNodeToRemove) {
+            dataNodeToRemove.parentNode!.removeChild(dataNodeToRemove);
+        }
+    };
+
+    const removeAllUserData = () => {
+        const nicknameElements = document.getElementsByClassName('data-node');
+        while (nicknameElements[0]) {
+            nicknameElements[0].parentNode!.removeChild(nicknameElements[0]);
+        }
+    };
+
+    const addClickListener = (videoElement: HTMLElement, userData: string) => {
+        videoElement.addEventListener('click', () => {
+            const mainVideo = document.querySelector('#main-video video') as HTMLVideoElement;
+            if (mainVideo.srcObject !== videoElement.srcObject) {
+                document.getElementById('main-video')!.classList.add('hidden');
+                document.getElementById('main-video')!.querySelector('p')!.innerHTML = userData;
+                mainVideo.srcObject = videoElement.srcObject;
+                document.getElementById('main-video')!.classList.remove('hidden');
+            }
+        });
+    };
+
+    const initMainVideo = (videoElement: HTMLVideoElement, userData: string) => {
+        const mainVideo = document.querySelector('#main-video video') as HTMLVideoElement;
+        mainVideo.srcObject = videoElement.srcObject;
+        document.querySelector('#main-video p')!.innerHTML = userData;
+        mainVideo['muted'] = true;
     };
 
     const getToken = async () => {
@@ -172,92 +224,47 @@ const Meeting: React.FC = () => {
     };
 
     return (
-        <div className="container">
-            {!session ? (
-                <div id="join">
-                    <div id="img-div">
-                        <img src="resources/images/openvidu_grey_bg_transp_cropped.png" alt="OpenVidu logo" />
-                    </div>
-                    <div id="join-dialog" className="jumbotron vertical-center">
-                        <h1>Join a video session</h1>
-                        <form className="form-group" onSubmit={(e) => { e.preventDefault(); joinSession(); }}>
-                            <p>
-                                <label>Participant:</label>
-                                <input
-                                    className="form-control"
-                                    type="text"
-                                    id="userName"
-                                    value={myUserName}
-                                    onChange={handleChangeUserName}
-                                    required
-                                />
-                            </p>
-                            <p>
-                                <label>Session:</label>
-                                <input
-                                    className="form-control"
-                                    type="text"
-                                    id="sessionId"
-                                    value={mySessionId}
-                                    onChange={handleChangeSessionId}
-                                    required
-                                />
-                            </p>
-                            <p className="text-center">
-                                <input className="btn btn-lg btn-success" name="commit" type="submit" value="JOIN" />
-                            </p>
-                        </form>
-                    </div>
-                </div>
-            ) : (
-                <div id="session">
-                    <div id="session-header">
-                        <h1 id="session-title">{mySessionId}</h1>
-                        <input
-                            className="btn btn-large btn-danger"
-                            type="button"
-                            id="buttonLeaveSession"
-                            onClick={leaveSession}
-                            value="Leave session"
-                        />
-                        <input
-                            className="btn btn-large btn-success"
-                            type="button"
-                            id="buttonSwitchCamera"
-                            onClick={switchCamera}
-                            value="Switch Camera"
-                        />
-                    </div>
-
-                    {mainStreamManager && (
-                        <div id="main-video" className="col-md-6">
-                            <UserVideoComponent streamManager={mainStreamManager} />
-                        </div>
-                    )}
-                    <div id="video-container" className="col-md-6">
-                        {publisher && (
-                            <div
-                                className="stream-container col-md-6 col-xs-6"
-                                onClick={() => handleMainVideoStream(publisher)}
-                            >
-                                <UserVideoComponent streamManager={publisher} />
-                            </div>
-                        )}
-                        {subscribers.map((sub, i) => (
-                            <div
-                                key={i}
-                                className="stream-container col-md-6 col-xs-6"
-                                onClick={() => handleMainVideoStream(sub)}
-                            >
-                                <span>{sub.id}</span>
-                                <UserVideoComponent streamManager={sub} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+        <div className="p-4">
+            <div id="join" className="space-y-4">
+                <input
+                    id="sessionId"
+                    value={sessionId}
+                    onChange={(e) => setSessionId(e.target.value)}
+                    className="border p-2 rounded w-full"
+                    placeholder="Session ID"
+                />
+                <input
+                    id="userName"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="border p-2 rounded w-full"
+                    placeholder="User Name"
+                />
+                <button onClick={joinSession} className="bg-blue-500 text-white p-2 rounded w-full">
+                    Join Session
+                </button>
+            </div>
+            <div id="session" className="hidden space-y-4">
+                <h1 id="session-title" className="text-xl font-bold"></h1>
+                <div id="container-cameras" className="grid grid-cols-2 gap-4"></div>
+                <div id="container-screens" className="grid grid-cols-2 gap-4"></div>
+                <button
+                    id="buttonScreenShare"
+                    onClick={publishScreenShare}
+                    className="bg-green-500 text-white p-2 rounded w-full hidden"
+                >
+                    Share Screen
+                </button>
+                <button onClick={leaveSession} className="bg-red-500 text-white p-2 rounded w-full">
+                    Leave Session
+                </button>
+            </div>
+            <div id="main-video" className="hidden">
+                <video className="w-full"></video>
+                <p className="text-center mt-2"></p>
+            </div>
         </div>
     );
 };
 
-export default Meeting;
+export default App;
