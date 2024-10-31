@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { OpenVidu, Session, Publisher } from 'openvidu-browser';
+import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 
 // OpenVidu global variables
@@ -20,6 +20,9 @@ const APPLICATION_SERVER_URL = "http://localhost:5000/";
 const App: React.FC = () => {
     const [sessionId, setSessionId] = useState<string>('SessionScreenA');
     const [userName, setUserName] = useState<string>(`Participant${Math.floor(Math.random() * 100)}`);
+    // const [sessionCamera, setSessionCamera] = useState<Session | undefined>(undefined);
+    // const [sessionScreen, setSessionScreen] = useState<Session | undefined>(undefined);
+    const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined)
     const [subscribers, setSubscribers] = useState<any[]>([]);
 
     useEffect(() => {
@@ -71,7 +74,7 @@ const App: React.FC = () => {
 
         // --- 4) Connect to the session with two different tokens: one for the camera and other for the screen ---
         try {
-            const token = await getToken(mySessionId);
+            const token = await getToken();
             await sessionCamera.connect(token, { clientData: myUserName });
 
             document.getElementById('session-title')!.innerText = mySessionId;
@@ -101,7 +104,7 @@ const App: React.FC = () => {
         }
 
         try {
-            const tokenScreen = await getToken(mySessionId);
+            const tokenScreen = await getToken();
             await sessionScreen.connect(tokenScreen, { clientData: myUserName });
             document.getElementById('buttonScreenShare')!.classList.remove('hidden');
             console.log("Session screen connected");

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { OpenVidu, Publisher, Session, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
-import UserVideoComponent from '../meeting/UserVideoComponent';
+import UserVideoComponent from '../test_meeting/UserVideoComponent';
 
 const APPLICATION_SERVER_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000/';
 
@@ -51,13 +51,27 @@ const Meeting: React.FC = () => {
 
     const joinSession = async () => {
         OV = new OpenVidu();
+        OVScreen = new OpenVidu();
 
         const newSession = OV.initSession();
+        const screenSession = OVScreen.initSession();
 
         newSession.on('streamCreated', (event) => {
-            const subscriber = newSession.subscribe(event.stream, 'container-cameras');
-            setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
+            if (event.stream.typeOfVideo === "CAMERA") {
+                const subscriber = newSession.subscribe(event.stream, 'container-cameras');
+                setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
+            }
         });
+
+        screenSession.on('streamCreated', (event) => {
+            if (event.stream.typeOfVideo === "SCREEN") {
+                const existingSubscriber = subscribers.find(sub => sub.stream.streamId === event.stream.streamId);
+                if (!existingSubscriber) {
+                    const subscriberScreen = screenSession.subscribe(event.stream, 'container-screens');
+                    setSubscribers((prevSubscribers) => [...prevSubscribers, subscriberScreen]);
+                }
+            }
+        })
 
         newSession.on('streamDestroyed', (event) => {
             deleteSubscriber(event.stream.streamManager);
@@ -92,6 +106,16 @@ const Meeting: React.FC = () => {
         } catch (error) {
             console.log('Error connecting to the session:', error);
         }
+
+        try {
+            const tokenScreen = await getToken();
+            await screenSession.connect(tokenScreen, { clientData: myUserName });
+
+
+        } catch (error) {
+            console.warn('There was an error connecting to the session for screen share:', error);
+
+        }
     };
 
     const startScreenShare = async () => {
@@ -121,14 +145,6 @@ const Meeting: React.FC = () => {
             setScreenSession(screenSession);
         } catch (error) {
             console.log('Error starting screen share:', error);
-        }
-    };
-
-    const stopScreenShare = () => {
-        if (screenSession) {
-            screenSession.unpublish(screenSession.publishers[0]);
-            screenSession.disconnect();
-            setScreenSession(null);
         }
     };
 

@@ -5,10 +5,22 @@ import MeetingButton from './MeetingButton';
 import Accessibility from './Accessibility';
 import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 const Home = () => {
+  const router = useRouter();
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCreateMeeting = async () => {
+    // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자
+    const createdId = currentTime.getTime() + Math.floor(Math.random() * 100000);
+    router.push(`preview/${createdId}`)
+  }
+
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -54,7 +66,7 @@ const Home = () => {
         <div className="text-5xl font-semibold">{formattedTime}</div>
         <div className="mt-5 text-xl font-semibold">{formattedDate}</div>
         <div className="mt-14 max-w-344 w-full flex flex-row justify-between">
-          <MeetingButton>새 회의</MeetingButton>
+          <MeetingButton onClick={handleCreateMeeting}>새 회의</MeetingButton>
           <MeetingButton onClick={handleOpenModal}>참가</MeetingButton>
         </div>
         {/* 수평선 */}

@@ -2,20 +2,28 @@
 
 import { useState, useEffect } from "react";
 import Control from "@/components/Control";
-import CameraOn from "../../../public/svgs/camera_on.svg";
-import CameraOff from "../../../public/svgs/camera_off.svg"
-import MicOn from "../../../public/svgs/mic_on.svg"
-import MicOff from "../../../public/svgs/mic_off.svg"
-import SettingIcon from "../../../public/svgs/setting.svg"
+import CameraOn from "../../../../public/svgs/camera_on.svg";
+import CameraOff from "../../../../public/svgs/camera_off.svg"
+import MicOn from "../../../../public/svgs/mic_on.svg"
+import MicOff from "../../../../public/svgs/mic_off.svg"
+import SettingIcon from "../../../../public/svgs/setting.svg"
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 const Preview = () => {
     const router = useRouter();
+    const params = useParams();
+
+    useEffect(() => {
+        console.log('session id', params.id)
+        setSessionId(params.id);
+
+    }, [params])
 
     const [isCameraOn, setIsCameraOn] = useState(false);
     const [isMicOn, setIsMicOn] = useState(false);
+    const [sessionId, setSessionId] = useState<string | string[]>("");
 
     const handleCameraClick = () => {
         setIsCameraOn(prevState => !prevState);
