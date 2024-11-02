@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Video from "@/components/Video";
 import Control from "@/components/Control";
 import CameraOn from "../../../../public/svgs/camera_on.svg";
 import CameraOff from "../../../../public/svgs/camera_off.svg";
@@ -9,7 +11,6 @@ import MicOff from "../../../../public/svgs/mic_off.svg";
 import SettingIcon from "../../../../public/svgs/setting.svg";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import { useRouter, useParams } from "next/navigation";
 
 const DATA = {
     user_name: "홍길동"
@@ -104,20 +105,14 @@ const Preview = () => {
             <div className="max-w-515 w-full flex flex-col items-center">
                 <h1 className="text-primary font-bold text-4xl">미리 보기</h1>
                 <p className="mt-2 text-primary">비디오와 오디오를 설정하세요</p>
-                <div className="relative flex h-80 w-full mt-10 mb-6 bg-[#141218] rounded-2xl">
-                    <video ref={videoRef} autoPlay className="h-full w-full rounded-2xl"></video>
-                    {!isCameraOn && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 flex justify-center items-center bg-primary-2 text-white font-semibold text-4xl rounded-full">
-                        {/* 입력한 닉네임이 공백일 때 기본 이름으로 설정 */}
-                        {nickName[0] ?? DATA.user_name[0]}
-                    </div>}
-                </div>
+                <Video videoRef={videoRef} isCameraOn={isCameraOn} isMicOn={isMicOn} nickName={nickName} userName={DATA.user_name} />
                 <div className="w-full mb-6 flex flex-row justify-between">
                     <div className="flex gap-4">
                         <Control name={'camera'} OnClick={handleCameraClick}>{isCameraOn ? <CameraOn /> : <CameraOff />}</Control>
-                        <Control name={'mic'} OnClick={handleMicClick}>{isMicOn ? <MicOn /> : <MicOff />}</Control>
+                        <Control name={'mic'} OnClick={handleMicClick}>{isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}</Control>
                     </div>
                     <button className="h-12 w-12 flex justify-center items-center border border-primary rounded-lg">
-                        <SettingIcon />
+                        <SettingIcon fill={'#5856D6'} />
                     </button>
                 </div>
                 <div className="flex flex-row w-full gap-4">

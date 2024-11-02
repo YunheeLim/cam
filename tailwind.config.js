@@ -12,6 +12,7 @@ module.exports = {
     extend: {
       colors: {
         primary: { DEFAULT: '#5856D6', 1: 'rgba(88, 86, 214, 0.05)', 2: '#7E47EB' },
+        secondary: { DEFAULT: '#C74E5B' }
       },
       fontFamily: {
         pretendard: ['var(--font-pretendard)', 'sans-serif'],
