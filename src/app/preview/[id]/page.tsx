@@ -11,6 +11,10 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { useRouter, useParams } from "next/navigation";
 
+const DATA = {
+    user_name: "홍길동"
+}
+
 const Preview = () => {
     const router = useRouter();
     const params = useParams();
@@ -18,7 +22,7 @@ const Preview = () => {
     const [isCameraOn, setIsCameraOn] = useState(true);
     const [isMicOn, setIsMicOn] = useState(true);
     const [sessionId, setSessionId] = useState<string | string[]>("");
-    const [nickName, setNickName] = useState<string>('홍길동');
+    const [nickName, setNickName] = useState<string>(DATA.user_name);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -40,30 +44,42 @@ const Preview = () => {
         }
     };
 
-    const stopMediaTracks = useCallback(() => {
-        if (!stream) return;
-        stream.getTracks().forEach((track) => track.stop());
-        setStream(null);
-    }, [stream]);
-
     useEffect(() => {
         if (isCameraOn) {
             console.log('camera on')
+            console.log(stream?.getVideoTracks())
+
+            stream?.getVideoTracks().forEach((track) => (track.enabled = isCameraOn));
 
             getMedia();
         } else {
             console.log('camera off')
+            console.log(stream?.getVideoTracks())
 
-            stopMediaTracks();
+            stream?.getVideoTracks().forEach((track) => (track.enabled = isCameraOn));
+            stream?.getVideoTracks().forEach((track) => (track.stop()));
+            // stream?.getTracks().forEach((track) => track.stop());
+            // setStream(null);
+            // stopMediaTracks();
         }
     }, [isCameraOn]);
 
     useEffect(() => {
-        if (stream) {
-            console.log('audio')
-            stream.getAudioTracks().forEach((track) => (track.enabled = isMicOn));
+        if (isMicOn) {
+            console.log('mic on');
+            console.log(stream?.getAudioTracks())
+
+            stream?.getAudioTracks().forEach((track) => (track.enabled = isMicOn));
+
+            getMedia();
+        } else {
+            console.log('mic off');
+            console.log(stream?.getAudioTracks())
+            stream?.getAudioTracks().forEach((track) => (track.enabled = isMicOn));
+            stream?.getAudioTracks().forEach((track) => (track.stop()));
+
         }
-    }, [isMicOn, stream]);
+    }, [isMicOn]);
 
     const handleCameraClick = () => {
         setIsCameraOn((prevState) => !prevState);
@@ -78,7 +94,9 @@ const Preview = () => {
     };
 
     const handleJoinClick = () => {
-        router.push(`/meeting`);
+        router.push(`/meeting/${sessionId}?nick_name=${nickName ?? DATA.user_name}`);
+
+        // router.push(`/test_meeting`);
     };
 
     return (
@@ -86,7 +104,13 @@ const Preview = () => {
             <div className="max-w-515 w-full flex flex-col items-center">
                 <h1 className="text-primary font-bold text-4xl">미리 보기</h1>
                 <p className="mt-2 text-primary">비디오와 오디오를 설정하세요</p>
-                <video ref={videoRef} autoPlay className="h-80 w-full mt-10 mb-6 bg-[#141218] rounded-2xl"></video>
+                <div className="relative flex h-80 w-full mt-10 mb-6 bg-[#141218] rounded-2xl">
+                    <video ref={videoRef} autoPlay className="h-full w-full rounded-2xl"></video>
+                    {!isCameraOn && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 flex justify-center items-center bg-primary-2 text-white font-semibold text-4xl rounded-full">
+                        {/* 입력한 닉네임이 공백일 때 기본 이름으로 설정 */}
+                        {nickName[0] ?? DATA.user_name[0]}
+                    </div>}
+                </div>
                 <div className="w-full mb-6 flex flex-row justify-between">
                     <div className="flex gap-4">
                         <Control name={'camera'} OnClick={handleCameraClick}>{isCameraOn ? <CameraOn /> : <CameraOff />}</Control>

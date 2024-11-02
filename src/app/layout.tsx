@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import Logo from '../../public/svgs/logo.svg';
-import Profile from '../../public/svgs/profile.svg';
+import { TopBar } from './top-bar';
 
 const pretendard = localFont({
   src: '../../public/fonts/PretendardVariable.woff2',
@@ -21,18 +20,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="kr" className={`${pretendard.variable}`}>
       <body className={`${pretendard.variable} h-screen flex flex-col`}>
-        <div className="h-24 px-8 flex flex-row justify-between items-center">
-          <div className="flex">
-            <Logo />
-            <h1 className="mx-2 text-3xl font-semibold text-primary">C.A.M</h1>
-          </div>
-          <button>
-            <Profile />
-          </button>
-        </div>
+        <TopBar />
         <div className="flex h-full w-full">{children}</div>
       </body>
     </html>
