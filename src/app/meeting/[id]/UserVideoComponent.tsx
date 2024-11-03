@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import OpenViduVideoComponent from './OvVideo';
-import MicOff from "../../../public/svgs/mic_off.svg";
+import MicOff from '../../../../public/svgs/mic_off.svg';
 
 interface UserVideoComponentProps {
   streamManager: any;
@@ -19,6 +19,9 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
         setAudioActive(event.newValue);
       }
     };
+    console.log('video type: ', streamManager.stream.typeOfVideo)
+    console.log('streamManager: ', streamManager)
+
 
     streamManager.on('streamPropertyChanged', handleStreamPropertyChanged);
 
@@ -28,8 +31,17 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
   }, [streamManager]);
 
   const getNicknameTag = () => {
-    // Gets the nickName of the user
-    // return JSON.parse(streamManager.stream.connection.data).clientData;
+    if (streamManager.stream.typeOfVideo == 'SCREEN') {
+      const jsonString = streamManager?.stream?.session?.options?.metadata;
+      const parsedData = JSON.parse(jsonString);
+      const owner = parsedData.clientData;
+      return `${owner}의 화면`;
+    }
+    else {
+      // Gets the nickName of the user
+      return JSON.parse(streamManager.stream.connection.data).clientData;
+    }
+
   };
 
   return (
@@ -37,7 +49,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
       {streamManager ? (
         <div className="relative streamcomponent w-full max-h-650">
           <OpenViduVideoComponent streamManager={streamManager} />
-          <div className="absolute bottom-2 left-2 flex justify-center items-center py-1 px-2 bg-[#060709] text-white text-sm">
+          <div className="absolute bottom-2 left-2 flex justify-center items-center py-1 px-2 bg-[rgba(6,7,9,0.7)] text-white text-sm rounded-md">
             {getNicknameTag()}
           </div>
           {!videoActive && (

@@ -17,9 +17,8 @@ import PeopleIcon from "../../../../public/svgs/people.svg";
 import ExitIcon from "../../../../public/svgs/exit.svg";
 import Video from "@/components/Video";
 import { useCallback, useEffect, useRef, useState } from "react";
-import UserVideoComponent from "@/app/test_meeting/UserVideoComponent";
-import OpenViduVideoComponent from "@/app/test_meeting/OvVideo";
-
+import UserVideoComponent from "./UserVideoComponent";
+import OpenViduVideoComponent from "./OvVideo";
 
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';

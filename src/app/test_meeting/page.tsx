@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OpenVidu, Publisher, Session, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
-import UserVideoComponent from './UserVideoComponent';
+import UserVideoComponent from '../meeting/[id]/UserVideoComponent';
 
 const APPLICATION_SERVER_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000/';
 
