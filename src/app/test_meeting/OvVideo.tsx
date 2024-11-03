@@ -5,7 +5,7 @@ interface OpenViduVideoComponentProps {
 }
 
 const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({ streamManager }) => {
-    const videoRef = useRef < HTMLVideoElement > (null);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -13,7 +13,7 @@ const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({ streamM
         }
     }, [streamManager]);
 
-    return <video autoPlay ref={videoRef} />;
+    return <video className='w-full max-h-650' autoPlay ref={videoRef} />;
 };
 
 export default OpenViduVideoComponent;

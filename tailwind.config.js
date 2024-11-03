@@ -20,6 +20,12 @@ module.exports = {
       screens: {
         xs: '360px',
       },
+      height: {
+        '650': '650px',
+      },
+      maxHeight: {
+        '650': '650px',
+      },
       maxWidth: {
         '344': '344px',
         '515': '515px'

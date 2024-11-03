@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { TopBar } from './top-bar';
+import { VideoProvider } from './contexts/VideoContext';
 
 const pretendard = localFont({
   src: '../../public/fonts/PretendardVariable.woff2',
@@ -20,12 +21,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="kr" className={`${pretendard.variable}`}>
       <body className={`${pretendard.variable} h-screen flex flex-col`}>
         <TopBar />
-        <div className="flex h-full w-full">{children}</div>
+        <VideoProvider>
+          <div className="flex h-full w-full">{children}</div>
+        </VideoProvider>
       </body>
     </html>
   );
