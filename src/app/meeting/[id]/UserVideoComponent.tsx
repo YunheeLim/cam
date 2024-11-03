@@ -45,9 +45,9 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
   };
 
   return (
-    <div>
+    <div className='w-full h-full flex flex-col justify-center'>
       {streamManager ? (
-        <div className="relative streamcomponent w-full max-h-650">
+        <div className="relative streamcomponent">
           <OpenViduVideoComponent streamManager={streamManager} />
           <div className="absolute bottom-2 left-2 flex justify-center items-center py-1 px-2 bg-[rgba(6,7,9,0.7)] text-white text-sm rounded-md">
             {getNicknameTag()}

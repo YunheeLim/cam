@@ -7,6 +7,7 @@ module.exports = {
 
     // `src` directory를 사용한다면
     './src/**/*.{js,ts,jsx,tsx,mdx}',
+
   ],
   theme: {
     extend: {
@@ -32,5 +33,5 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/aspect-ratio'),],
 };

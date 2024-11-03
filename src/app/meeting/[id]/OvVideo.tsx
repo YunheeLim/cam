@@ -13,7 +13,7 @@ const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({ streamM
         }
     }, [streamManager]);
 
-    return <video className='w-full max-h-650' autoPlay ref={videoRef} />;
+    return <div className='aspect-w-16 aspect-h-9'><video className='w-full h-full' autoPlay ref={videoRef} /></div>;
 };
 
 export default OpenViduVideoComponent;

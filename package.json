@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/socket.io-client": "^1.4.34",
     "axios": "^1.7.7",
     "bufferutil": "^4.0.8",

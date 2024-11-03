@@ -313,7 +313,7 @@ const Meeting = () => {
             )} */}
             <div
                 id="video-container"
-                className={`grid w-full max-h-650 ${subscribers.length === 0
+                className={`grid w-full h-full ${subscribers.length === 0
                     ? 'grid-cols-1'
                     : subscribers.length === 1
                         ? 'grid-cols-2 justify-center'
