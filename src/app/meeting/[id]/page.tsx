@@ -300,12 +300,12 @@ const Meeting = () => {
         return response.data;
     };
 
-    return <div className="flex flex-col w-full h-full bg-black">
+    return <div className="flex flex-col justify-center w-full h-full bg-black">
         {/* <div className="h-full flex px-6">
             <Video height={'h-650'} videoRef={videoRef} userName={DATA.user_name} nickName={searchParams.get('nickName') as string} isCameraOn={isCameraOn} isMicOn={isMicOn} />
         </div> */}
 
-        <div id="session" className="flex flex-col h-full max-h-650 px-6 overflow-auto">
+        <div id="session" className="flex flex-col justify-center h-full px-6 overflow-auto">
             {/* {mainStreamManager && (
                 <div id="main-video" className="col-md-6">
                     <UserVideoComponent streamManager={mainStreamManager} />
@@ -332,8 +332,7 @@ const Meeting = () => {
                 ))}
             </div>
         </div>
-
-
+        {/* Bottom bar */}
         <div className="relative w-full flex flex-row p-6 justify-between">
             <div className="flex gap-4">
                 <Control name='camera' OnClick={handleCameraClick}>{isCameraOn ? <CameraOn /> : <CameraOff />}</Control>
