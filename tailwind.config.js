@@ -30,6 +30,9 @@ module.exports = {
       maxWidth: {
         '344': '344px',
         '515': '515px'
+      },
+      inset: {
+        '1/10': '10%'
       }
     },
   },

@@ -105,8 +105,8 @@ const Preview = () => {
     };
 
     return (
-        <div className="w-full flex flex-col items-center px-6">
-            <div className="max-w-515 w-full flex flex-col items-center">
+        <div className="relative w-full flex flex-col items-center px-6">
+            <div className="absolute top-1/10 max-w-515 w-full flex flex-col items-center">
                 <h1 className="text-primary font-bold text-4xl">미리 보기</h1>
                 <p className="mt-2 text-primary mb-10">비디오와 오디오를 설정하세요</p>
                 <Video width={'full'} height={'h-80'} videoRef={videoRef} isCameraOn={isCameraOn} isMicOn={isMicOn} nickName={nickName} userName={DATA.user_name} />
