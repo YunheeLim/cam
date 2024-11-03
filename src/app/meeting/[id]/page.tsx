@@ -95,17 +95,15 @@ const Meeting = () => {
     const [currentVideoDevice, setCurrentVideoDevice] = useState<MediaDeviceInfo>();
 
     const OV = useRef<OpenVidu>();
-    // const OVScreen = useRef<OpenVidu>();
+    const OVScreen = useRef<OpenVidu>();
 
 
     useEffect(() => {
         const onBeforeUnload = () => leaveSession();
         window.addEventListener('beforeunload', onBeforeUnload);
+
         return () => window.removeEventListener('beforeunload', onBeforeUnload);
     }, [session]);
-
-    const handleChangeSessionId = (e: React.ChangeEvent<HTMLInputElement>) => setMySessionId(e.target.value);
-    const handleChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => setMyUserName(e.target.value);
 
     const handleMainVideoStream = (stream: StreamManager) => {
         if (mainStreamManager !== stream) setMainStreamManager(stream);
@@ -204,21 +202,28 @@ const Meeting = () => {
     };
 
     const publishScreenShare = async () => {
-        var OVScreen = new OpenVidu();
-        var sessionScreen = OVScreen.initSession();
+        // var OVScreen = new OpenVidu();
+        OVScreen.current = new OpenVidu();
+
+        // var sessionScreen = OVScreen.initSession();
+        const sessionScreen = OVScreen.current.initSession();
+
+
         getToken().then((token) => {
             sessionScreen.connect(token).then(() => {
-                var publisher = OVScreen.initPublisher("html-element-id", { videoSource: "screen" });
+                var publisher = OVScreen?.current?.initPublisher("html-element-id", { videoSource: "screen" });
 
-                publisher.once('accessAllowed', (event) => {
-                    publisher.stream.getMediaStream().getVideoTracks()[0].addEventListener('ended', () => {
+                publisher?.once('accessAllowed', (event) => {
+                    publisher?.stream.getMediaStream().getVideoTracks()[0].addEventListener('ended', () => {
                         console.log('User pressed the "Stop sharing" button');
+                        sessionScreen.unpublish(publisher);
                     });
                     sessionScreen.publish(publisher);
-
+                    setScreenSession(sessionScreen);
+                    setScreenPublisher(publisher);
                 });
 
-                publisher.once('accessDenied', (event) => {
+                publisher?.once('accessDenied', (event) => {
                     console.warn('ScreenShare: Access Denied');
                 });
 
@@ -227,34 +232,30 @@ const Meeting = () => {
 
             }));
         });
-
-        // const screenPublisher = await OVScreen.current?.initPublisherAsync(undefined, {
-        //     videoSource: 'screen',
-        // });
-        // if (screenPublisher) {
-        //     sessionScreen.publish(screenPublisher);
-        //     setScreenPublisher(screenPublisher)
-        //     const devices = await OV.current?.getDevices();
-        //     const videoDevices = devices?.filter((device) => device.kind === 'videoinput');
-        //     const currentVideoDeviceId = newPublisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-        //     const currentDevice = videoDevices?.find((device) => device.deviceId === currentVideoDeviceId);
-
-        //     setScreenPublisher(screenPublisher)
-        //     setScreenSession(sessionScreen)
-
-        // }
     };
 
     const leaveSession = () => {
+        if (screenSession && screenPublisher) {
+            screenSession.unpublish(screenPublisher);
+        }
+
         session?.disconnect();
+        sessionScreen?.disconnect();
 
         OV.current = undefined;
+        OVScreen.current = undefined;
+
         setSession(undefined);
+        setScreenSession(undefined);
+
         setSubscribers([]);
         setMySessionId('SessionA');
         setMyUserName('참여자' + Math.floor(Math.random() * 100));
         setMainStreamManager(undefined);
+
         setPublisher(undefined);
+        setScreenPublisher(undefined);
+
         router.push('/')
     };
 
