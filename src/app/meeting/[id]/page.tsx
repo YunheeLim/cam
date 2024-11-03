@@ -45,7 +45,7 @@ const Meeting = () => {
     const params = useParams();
     const searchParams = useSearchParams();
     const [isOcrOn, setIsOcrOn] = useState(false); // TODO: API로 호출
-    const [numParticipants, setNumParticipants] = useState(1);
+    const [numParticipants, setNumParticipants] = useState(0);
 
     const { videoRef, stream, isCameraOn, setIsCameraOn, isMicOn, setIsMicOn } = useVideo();
 
@@ -138,7 +138,14 @@ const Meeting = () => {
 
     // 참여자 수 가져오기
     useEffect(() => {
-        setNumParticipants(subscribers.length + 1);
+        let num = 1;
+        subscribers.map((sub: any) => {
+            // 화면 공유 스트림은 개수에서 제외
+            if (sub?.stream?.typeOfVideo === "CAMERA") {
+                num += 1;
+            }
+        })
+        setNumParticipants(num);
     }, [subscribers])
 
     const joinSession = async () => {
@@ -154,11 +161,6 @@ const Meeting = () => {
             const subscriber = newSession.subscribe(event.stream, undefined);
             setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
         });
-
-        // screenSession.on('streamCreated', (event) => {
-        //     const subscriber = screenSession.subscribe(event.stream, undefined);
-        //     setSubscribers((prevSubscribers) => [...prevSubscribers, subscriber]);
-        // });
 
         newSession.on('streamDestroyed', (event) => {
             deleteSubscriber(event.stream.streamManager);
@@ -190,19 +192,12 @@ const Meeting = () => {
                 setMainStreamManager(newPublisher);
                 setCurrentVideoDevice(currentDevice);
                 setSession(newSession);
+                setScreenSharing(false);
+
             }
         } catch (error) {
             console.log('Error connecting to the session:', error);
         }
-
-        // try {
-        //     const tokenScreen = await getToken();
-        //     await screenSession.connect(tokenScreen, { clientData: myUserName });
-        //     console.log("Session screen connected");
-
-        // } catch (error) {
-        //     console.log('Error connecting to the session:', error);
-        // }
     };
 
     const publishScreenShare = async () => {
@@ -221,6 +216,7 @@ const Meeting = () => {
                     sessionScreen.publish(publisher);
                     setScreenSession(sessionScreen);
                     setScreenPublisher(publisher);
+                    setScreenSharing(true);
                 });
 
                 publisher?.once('accessDenied', (event) => {
