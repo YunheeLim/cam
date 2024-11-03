@@ -45,7 +45,7 @@ const Meeting = () => {
     const params = useParams();
     const searchParams = useSearchParams();
     const [isOcrOn, setIsOcrOn] = useState(false); // TODO: API로 호출
-    const [peopleCnt, setPeopleCnt] = useState(2);
+    const [numParticipants, setNumParticipants] = useState(1);
 
     const { videoRef, stream, isCameraOn, setIsCameraOn, isMicOn, setIsMicOn } = useVideo();
 
@@ -136,6 +136,11 @@ const Meeting = () => {
         }
     }, [isNickNameSet]);
 
+    // 참여자 수 가져오기
+    useEffect(() => {
+        setNumParticipants(subscribers.length + 1);
+    }, [subscribers])
+
     const joinSession = async () => {
         console.log('joinSession triggered')
         // e.preventDefault();
@@ -201,12 +206,8 @@ const Meeting = () => {
     };
 
     const publishScreenShare = async () => {
-        // var OVScreen = new OpenVidu();
         OVScreen.current = new OpenVidu();
-
-        // var sessionScreen = OVScreen.initSession();
         const sessionScreen = OVScreen.current.initSession();
-
 
         getToken().then((token) => {
             sessionScreen.connect(token).then(() => {
@@ -348,7 +349,7 @@ const Meeting = () => {
                 <Button onClick={leaveSession} className="p-2 bg-secondary"><ExitIcon /></Button>
             </div>
             <div className="flex gap-4">
-                <Button className="flex gap-2 p-2 font-semibold"><PeopleIcon />{peopleCnt}</Button>
+                <Button className="flex gap-2 p-2 font-semibold"><PeopleIcon />{numParticipants}</Button>
                 <Button className="p-2"><SettingIcon fill={'#ffffff'} /></Button>
             </div>
         </div>

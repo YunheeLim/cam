@@ -15,7 +15,6 @@ const Video: React.FC<VideoProps> = ({ width, height, videoRef, isCameraOn, isMi
         <video ref={videoRef} autoPlay className={`h-full w-full rounded-2xl`}></video>
         {/* 카메라 on일 때 name tag */}
         {isCameraOn && <div className="absolute bottom-2 left-2 flex justify-center items-center py-1 px-2 bg-[rgba(6,7,9,0.7)] text-white text-sm rounded-md">
-
             {nickName}</div>}
         {/* 카메라 off */}
         {!isCameraOn && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 flex justify-center items-center bg-primary-2 text-white font-semibold text-4xl rounded-full">
