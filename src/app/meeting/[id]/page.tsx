@@ -350,17 +350,18 @@ const Meeting = () => {
         )}
         <div
           id="video-container"
-          className={`grid h-full w-full ${
+          // className="flex h-full w-full items-center justify-center"
+          className={`grid h-full items-center justify-center ${
             subscribers.length === 0
-              ? 'grid-cols-1'
+              ? 'px-1/10 grid-cols-1 '
               : subscribers.length === 1
-              ? 'grid-cols-2 justify-center'
+              ? 'grid-cols-2'
               : 'grid-cols-3'
           } gap-4`}
         >
           {publisher && (
             <div
-              className={`stream-container`}
+              id="stream-container"
               onClick={() => {
                 // handleMainVideoStream(publisher)
               }}

@@ -26,6 +26,7 @@ module.exports = {
       },
       height: {
         650: '650px',
+        'video-container': 'calc(100vh - 182px)',
       },
       maxHeight: {
         650: '650px',
@@ -36,6 +37,10 @@ module.exports = {
       },
       inset: {
         '1/20': '5%',
+      },
+      padding: {
+        '1/10': '10%',
+        '16by9': '23%', // 16:9 aspect ratio (9 / 16 * 100)
       },
     },
   },

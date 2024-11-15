@@ -49,7 +49,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
   };
 
   return (
-    <div className="flex h-full w-full flex-col justify-center">
+    <div className="flex h-full w-full flex-col">
       {streamManager ? (
         <div className="streamcomponent relative">
           <OpenViduVideoComponent streamManager={streamManager} />
