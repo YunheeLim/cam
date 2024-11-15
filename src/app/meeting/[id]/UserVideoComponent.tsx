@@ -6,9 +6,15 @@ interface UserVideoComponentProps {
   streamManager: any;
 }
 
-const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }) => {
-  const [videoActive, setVideoActive] = useState(streamManager.stream.videoActive);
-  const [audioActive, setAudioActive] = useState(streamManager.stream.audioActive);
+const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
+  streamManager,
+}) => {
+  const [videoActive, setVideoActive] = useState(
+    streamManager.stream.videoActive,
+  );
+  const [audioActive, setAudioActive] = useState(
+    streamManager.stream.audioActive,
+  );
 
   useEffect(() => {
     const handleStreamPropertyChanged = (event: any) => {
@@ -19,9 +25,8 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
         setAudioActive(event.newValue);
       }
     };
-    console.log('video type: ', streamManager.stream.typeOfVideo)
-    console.log('streamManager: ', streamManager)
-
+    console.log('video type: ', streamManager.stream.typeOfVideo);
+    console.log('streamManager: ', streamManager);
 
     streamManager.on('streamPropertyChanged', handleStreamPropertyChanged);
 
@@ -32,20 +37,19 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({ streamManager }
 
   const getNicknameTag = () => {
     if (streamManager.stream.typeOfVideo == 'SCREEN') {
+      console.log(streamManager);
       const jsonString = streamManager?.stream?.session?.options?.metadata;
       const parsedData = JSON.parse(jsonString);
       const owner = parsedData.clientData;
       return `${owner}의 화면`;
-    }
-    else {
+    } else {
       // Gets the nickName of the user
       return JSON.parse(streamManager.stream.connection.data).clientData;
     }
-
   };
 
   return (
-    <div className='w-full h-full flex flex-col justify-center'>
+    <div className="w-full h-full flex flex-col justify-center">
       {streamManager ? (
         <div className="relative streamcomponent">
           <OpenViduVideoComponent streamManager={streamManager} />

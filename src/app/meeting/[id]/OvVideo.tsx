@@ -1,19 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 
 interface OpenViduVideoComponentProps {
-    streamManager: any;
+  streamManager: any;
 }
 
-const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({ streamManager }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
+const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({
+  streamManager,
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-    useEffect(() => {
-        if (videoRef.current) {
-            streamManager.addVideoElement(videoRef.current);
-        }
-    }, [streamManager]);
+  useEffect(() => {
+    if (videoRef.current) {
+      streamManager.addVideoElement(videoRef.current);
+    }
+  }, [streamManager]);
 
-    return <div className='aspect-w-16 aspect-h-9'><video className='rounded-lg object-cover' autoPlay ref={videoRef} /></div>;
+  return (
+    <div className="aspect-w-16 aspect-h-9">
+      <video className="rounded-lg object-cover" autoPlay ref={videoRef} />
+    </div>
+  );
 };
 
 export default OpenViduVideoComponent;

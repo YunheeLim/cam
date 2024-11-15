@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: string | React.ReactNode;
@@ -7,7 +7,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   props?: any;
 }
 
-const Button: React.FC<ButtonProps> = ({ children, onClick, className, ...props }) => {
+const Button: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+  className,
+  ...props
+}) => {
   return (
     <button
       onClick={onClick}

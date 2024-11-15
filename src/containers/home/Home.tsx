@@ -9,18 +9,18 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 const Home = () => {
   const router = useRouter();
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateMeeting = async () => {
     // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자
-    const createdId = currentTime.getTime() + Math.floor(Math.random() * 100000);
-    router.push(`preview/${createdId}`)
-  }
-
+    const createdId =
+      currentTime.getTime() + Math.floor(Math.random() * 100000);
+    router.push(`preview/${createdId}`);
+  };
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -49,8 +49,9 @@ const Home = () => {
   ];
   const dayName = daysOfWeek[currentTime.getDay()];
 
-  const formattedDate = `${dayName}, ${currentTime.getMonth() + 1
-    }월 ${currentTime.getDate()}일`;
+  const formattedDate = `${dayName}, ${
+    currentTime.getMonth() + 1
+  }월 ${currentTime.getDate()}일`;
 
   const hours = currentTime.getHours();
   const minutes = currentTime.getMinutes();
