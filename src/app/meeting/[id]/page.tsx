@@ -338,10 +338,10 @@ const Meeting = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center w-full h-full bg-black">
+    <div className="flex h-full w-full flex-col justify-center bg-black">
       <div
         id="session"
-        className="flex flex-col justify-center w-full h-full px-6"
+        className="flex h-full w-full flex-col justify-center px-6"
       >
         {mainStreamManager && (
           <div id="main-video" className="col-md-6">
@@ -350,7 +350,7 @@ const Meeting = () => {
         )}
         <div
           id="video-container"
-          className={`grid w-full h-full ${
+          className={`grid h-full w-full ${
             subscribers.length === 0
               ? 'grid-cols-1'
               : subscribers.length === 1
@@ -387,7 +387,7 @@ const Meeting = () => {
         </div>
       </div>
       {/* Bottom bar */}
-      <div className="relative w-full h-24 flex flex-row p-6 justify-between">
+      <div className="relative flex h-24 w-full flex-row justify-between p-6">
         <div className="flex gap-4">
           <Control name="camera" OnClick={handleCameraClick}>
             {isCameraOn ? <CameraOn /> : <CameraOff />}
@@ -399,11 +399,11 @@ const Meeting = () => {
             {isOcrOn ? <SpeakerOn /> : <SpeakerOff />}
           </Control>
         </div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-row gap-4">
+        <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
           <Button onClick={publishScreenShare} className="p-2">
             <ScreenShareIcon />
           </Button>
-          <Button onClick={leaveSession} className="p-2 bg-secondary">
+          <Button onClick={leaveSession} className="bg-secondary p-2">
             <ExitIcon />
           </Button>
         </div>

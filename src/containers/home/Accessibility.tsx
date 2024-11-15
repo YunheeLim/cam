@@ -9,7 +9,7 @@ interface Accessibility {
 
 const Accessibility: React.FC<Accessibility> = ({ children }) => {
   return (
-    <div className="mb-6 w-full px-1 flex flex-row justify-between">
+    <div className="mb-6 flex w-full flex-row justify-between px-1">
       <div className="flex">
         {children === '스크린 리더' ? <ScreenIcon /> : <KeyboardIcon />}
         {/* <Icon

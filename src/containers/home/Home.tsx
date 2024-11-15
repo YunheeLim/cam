@@ -61,18 +61,18 @@ const Home = () => {
   const formattedTime = `${formattedHours} : ${formattedMinutes} ${ampm}`;
 
   return (
-    <div className="flex flex-row h-full w-full justify-center items-center">
+    <div className="flex h-full w-full flex-row items-center justify-center">
       {/* Wrapper */}
-      <div className="w-11/12 md:w-[700px] py-16 px-6 sm:px-0 rounded-3xl flex flex-col justify-center items-center bg-primary-1 text-primary">
+      <div className="flex w-11/12 flex-col items-center justify-center rounded-3xl bg-primary-1 px-6 py-16 text-primary sm:px-0 md:w-[700px]">
         <div className="text-5xl font-semibold">{formattedTime}</div>
         <div className="mt-5 text-xl font-semibold">{formattedDate}</div>
-        <div className="mt-14 max-w-344 w-full flex flex-row justify-between">
+        <div className="mt-14 flex w-full max-w-344 flex-row justify-between">
           <MeetingButton onClick={handleCreateMeeting}>새 회의</MeetingButton>
           <MeetingButton onClick={handleOpenModal}>참가</MeetingButton>
         </div>
         {/* 수평선 */}
         <div className="my-10 h-px w-4/6 bg-primary"></div>
-        <div className="w-full sm:w-[416px] flex flex-col items-center">
+        <div className="flex w-full flex-col items-center sm:w-[416px]">
           <Accessibility>스크린 리더</Accessibility>
           <Accessibility>단축키</Accessibility>
           <Button className="mt-3 w-full">저장</Button>

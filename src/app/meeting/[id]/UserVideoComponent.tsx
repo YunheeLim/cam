@@ -49,22 +49,22 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center">
+    <div className="flex h-full w-full flex-col justify-center">
       {streamManager ? (
-        <div className="relative streamcomponent">
+        <div className="streamcomponent relative">
           <OpenViduVideoComponent streamManager={streamManager} />
-          <div className="absolute bottom-2 left-2 flex justify-center items-center py-1 px-2 bg-[rgba(6,7,9,0.7)] text-white text-sm rounded-md">
+          <div className="absolute bottom-2 left-2 flex items-center justify-center rounded-md bg-[rgba(6,7,9,0.7)] px-2 py-1 text-sm text-white">
             {getNicknameTag()}
           </div>
           {!videoActive && (
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 flex justify-center items-center bg-primary-2 text-white font-semibold text-4xl rounded-full">
+            <div className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-primary-2 text-4xl font-semibold text-white">
               {/* 입력한 닉네임이 공백일 때 기본 이름으로 설정 */}
               {getNicknameTag()[0]}
             </div>
           )}
           {/* 마이크 off */}
           {!audioActive && (
-            <div className="absolute top-2 right-2 flex justify-center items-center h-8 w-8 rounded-full bg-[#293042]">
+            <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
               <MicOff width={16} height={16} />
             </div>
           )}

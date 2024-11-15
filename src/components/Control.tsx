@@ -13,12 +13,12 @@ const Control: React.FC<ControlProps> = props => {
       <div className="flex h-12 w-[90px] rounded-lg bg-primary">
         <div
           onClick={props.OnClick}
-          className="flex flex-grow-[5.5] justify-center items-center"
+          className="flex flex-grow-[5.5] items-center justify-center"
         >
           <div>{props.children}</div>
         </div>
         <div className="w-px bg-[#4645ab]"></div>
-        <div className="flex flex-grow-[4.5] justify-center items-center">
+        <div className="flex flex-grow-[4.5] items-center justify-center">
           <div>
             <MoreIcon />
           </div>

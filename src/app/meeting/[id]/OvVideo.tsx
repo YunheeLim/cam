@@ -16,7 +16,7 @@ const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> = ({
   }, [streamManager]);
 
   return (
-    <div className="aspect-w-16 aspect-h-9">
+    <div className="aspect-h-9 aspect-w-16">
       <video className="rounded-lg object-cover" autoPlay ref={videoRef} />
     </div>
   );

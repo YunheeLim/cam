@@ -9,7 +9,7 @@ export function TopBar() {
 
   return (
     <div
-      className={`h-24 px-8 flex flex-row justify-between items-center ${
+      className={`flex h-24 flex-row items-center justify-between px-8 ${
         pathname.includes('/meeting') ? 'bg-black' : 'bg-white'
       } `}
     >

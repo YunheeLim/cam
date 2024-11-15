@@ -116,10 +116,10 @@ const Preview = () => {
   };
 
   return (
-    <div className="relative w-full flex flex-col items-center px-6">
-      <div className="absolute top-1/20 max-w-515 w-full flex flex-col items-center">
-        <h1 className="text-primary font-bold text-4xl">미리 보기</h1>
-        <p className="mt-2 text-primary mb-10">비디오와 오디오를 설정하세요</p>
+    <div className="relative flex w-full flex-col items-center px-6">
+      <div className="absolute top-1/20 flex w-full max-w-515 flex-col items-center">
+        <h1 className="text-4xl font-bold text-primary">미리 보기</h1>
+        <p className="mb-10 mt-2 text-primary">비디오와 오디오를 설정하세요</p>
         <Video
           width={'full'}
           height={'h-80'}
@@ -129,7 +129,7 @@ const Preview = () => {
           nickName={nickName}
           userName={DATA.user_name}
         />
-        <div className="w-full my-6 flex flex-row justify-between">
+        <div className="my-6 flex w-full flex-row justify-between">
           <div className="flex gap-4">
             <Control name={'camera'} OnClick={handleCameraClick}>
               {isCameraOn ? <CameraOn /> : <CameraOff />}
@@ -138,11 +138,11 @@ const Preview = () => {
               {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
             </Control>
           </div>
-          <button className="h-12 w-12 flex justify-center items-center border border-primary rounded-lg">
+          <button className="flex h-12 w-12 items-center justify-center rounded-lg border border-primary">
             <SettingIcon fill={'#5856D6'} />
           </button>
         </div>
-        <div className="flex flex-row w-full gap-4">
+        <div className="flex w-full flex-row gap-4">
           <Input
             placeholder="사용할 이름을 입력해주세요"
             defaultValue={'홍길동'}

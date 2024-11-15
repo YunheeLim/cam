@@ -16,7 +16,7 @@ const BottomBar = () => {
   const [peopleCnt, setPeopleCnt] = useState(1);
 
   return (
-    <div className="relative w-full flex flex-row p-6 justify-between">
+    <div className="relative flex w-full flex-row justify-between p-6">
       <div className="flex gap-4">
         <Control name="camera" OnClick={() => {}}>
           <CameraOn />
@@ -28,11 +28,11 @@ const BottomBar = () => {
           <SpeakerOn />
         </Control>
       </div>
-      <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-row gap-4">
+      <div className="left-1/2 absolute flex -translate-x-1/2 transform flex-row gap-4">
         <Button className="p-2">
           <ScreenShareIcon />
         </Button>
-        <Button className="p-2 bg-secondary">
+        <Button className="bg-secondary p-2">
           <ExitIcon />
         </Button>
       </div>
