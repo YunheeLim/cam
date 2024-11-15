@@ -220,9 +220,12 @@ const Meeting = () => {
       sessionScreen
         .connect(token)
         .then(() => {
-          var publisher = OVScreen?.current?.initPublisher('html-element-id', {
-            videoSource: 'screen',
-          });
+          const publisher = OVScreen?.current?.initPublisher(
+            'html-element-id',
+            {
+              videoSource: 'screen',
+            },
+          );
 
           publisher?.once('accessAllowed', event => {
             publisher?.stream
@@ -338,7 +341,7 @@ const Meeting = () => {
     <div className="flex flex-col justify-center w-full h-full bg-black">
       <div
         id="session"
-        className="flex flex-col justify-center w-full h-full px-6 overflow-auto"
+        className="flex flex-col justify-center w-full h-full px-6"
       >
         {mainStreamManager && (
           <div id="main-video" className="col-md-6">
@@ -378,7 +381,7 @@ const Meeting = () => {
                 >
                   <UserVideoComponent streamManager={sub} />
                 </div>
-              );
+              )
             );
           })}
         </div>
@@ -415,7 +418,7 @@ const Meeting = () => {
         </div>
       </div>
       {/* <BottomBar /> */}
-    </div>;
+    </div>
   );
 };
 

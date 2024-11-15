@@ -11,10 +11,10 @@ const MeetingButton: React.FC<MeetingButton> = ({ children, onClick }) => {
   return (
     <div className="flex flex-col items-center" onClick={onClick}>
       <button
-        className={`h-28 w-36 flex justify-center items-center rounded-3xl ${
+        className={`flex h-28 w-36 items-center justify-center rounded-3xl ${
           children === '새 회의'
             ? 'bg-primary'
-            : `bg-white border border-primary`
+            : `border border-primary bg-white`
         }`}
       >
         {children === '새 회의' ? <CameraIcon /> : <PlusIcon />}

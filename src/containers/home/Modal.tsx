@@ -23,21 +23,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 p-5 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-5"
       onClick={handleBackgroundClick}
     >
-      <div className="relative flex flex-col w-96 bg-white p-5 rounded-2xl">
-        <div className="absolute top-5 right-5">
+      <div className="relative flex w-96 flex-col rounded-2xl bg-white p-5">
+        <div className="absolute right-5 top-5">
           <button onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
-        <h1 className="font-semibold text-lg">회의 참가</h1>
-        <div className="mt-5 flex flex-col items-center justify-between gap-5 flex-grow">
+        <h1 className="text-lg font-semibold">회의 참가</h1>
+        <div className="mt-5 flex flex-grow flex-col items-center justify-between gap-5">
           <Input placeholder="회의 ID 또는 링크" />
           <button
             onClick={() => router.push('/preview')}
-            className="w-full py-3 bg-primary text-white font-semibold rounded-lg"
+            className="w-full rounded-lg bg-primary py-3 font-semibold text-white"
           >
             참가
           </button>

@@ -4,12 +4,12 @@ module.exports = {
     browser: true,
     node: true,
   },
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier', 'prettier-plugin-tailwindcss'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
-    // "prettier"
+    "prettier"
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -20,7 +20,8 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'warn',
     // "react/react-in-jsx-scope": "off",
     'react/prop-types': 'off',
-    "@typescript-eslint/no-explicit-any":'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
     semi: 'error',
   },
   parser: '@typescript-eslint/parser',
