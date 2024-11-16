@@ -342,9 +342,11 @@ const Meeting = () => {
       <div
         id="session"
         className={`h-video-container flex w-full ${
-          mainStreamManager ? 'flex-row items-center gap-4' : 'flex-col'
+          mainStreamManager
+            ? 'flex-row items-center gap-4'
+            : 'flex-col overflow-auto'
         }
-       justify-center overflow-auto px-6`}
+       justify-center px-6`}
       >
         {mainStreamManager && (
           <div id="main-video" className="w-4/6">
@@ -356,7 +358,7 @@ const Meeting = () => {
           // className="flex h-full w-full items-center justify-center"
           className={`${
             mainStreamManager
-              ? 'h-video-container flex flex-col overflow-scroll'
+              ? 'max-h-video-container flex flex-col overflow-auto'
               : subscribers.length === 0
               ? 'h-video-container px-1/10 grid grid-cols-1 items-center justify-center'
               : subscribers.length === 1
@@ -369,7 +371,7 @@ const Meeting = () => {
           {publisher && (
             <div
               id="stream-container"
-              className={`${mainStreamManager ? 'w-60' : ''}`}
+              className={`${mainStreamManager ? ' w-60' : ''}`}
               onClick={() => {
                 // handleMainVideoStream(publisher)
               }}
@@ -384,7 +386,7 @@ const Meeting = () => {
                 <div
                   key={i}
                   id="stream-container"
-                  className={`${mainStreamManager ? 'w-60' : ''}`}
+                  className={`${mainStreamManager ? ' w-60' : ''}`}
                   onClick={() => {
                     // handleMainVideoStream(sub)
                   }}

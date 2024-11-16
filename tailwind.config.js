@@ -30,6 +30,7 @@ module.exports = {
       },
       maxHeight: {
         650: '650px',
+        'video-container': 'calc(100vh - 182px)',
       },
       maxWidth: {
         344: '344px',
