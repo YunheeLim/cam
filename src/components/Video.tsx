@@ -39,11 +39,13 @@ const Video: React.FC<VideoProps> = ({
         </div>
       )}
       {/* 마이크 off */}
-      {!isMicOn && (
-        <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
-          <MicOff width={16} height={16} />
-        </div>
-      )}
+      <div>
+        {!isMicOn && (
+          <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
+            <MicOff width={16} height={16} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

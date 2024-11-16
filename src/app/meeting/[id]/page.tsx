@@ -341,27 +341,35 @@ const Meeting = () => {
     <div className="flex h-full w-full flex-col justify-center bg-black">
       <div
         id="session"
-        className="flex h-full w-full flex-col justify-center px-6"
+        className={`h-video-container flex w-full ${
+          mainStreamManager ? 'flex-row items-center gap-4' : 'flex-col'
+        }
+       justify-center overflow-auto px-6`}
       >
         {mainStreamManager && (
-          <div id="main-video" className="col-md-6">
+          <div id="main-video" className="w-4/6">
             <UserVideoComponent streamManager={mainStreamManager} />
           </div>
         )}
         <div
           id="video-container"
           // className="flex h-full w-full items-center justify-center"
-          className={`grid h-full items-center justify-center ${
-            subscribers.length === 0
-              ? 'px-1/10 grid-cols-1 '
+          className={`${
+            mainStreamManager
+              ? 'h-video-container flex flex-col overflow-scroll'
+              : subscribers.length === 0
+              ? 'h-video-container px-1/10 grid grid-cols-1 items-center justify-center'
               : subscribers.length === 1
-              ? 'grid-cols-2'
-              : 'grid-cols-3'
+              ? 'h-video-container grid grid-cols-2 items-center justify-center'
+              : subscribers.length <= 3
+              ? 'h-video-container px-1/10 grid grid-cols-2 items-center justify-center'
+              : 'h-video-container grid grid-cols-3 items-center justify-center'
           } gap-4`}
         >
           {publisher && (
             <div
               id="stream-container"
+              className={`${mainStreamManager ? 'w-60' : ''}`}
               onClick={() => {
                 // handleMainVideoStream(publisher)
               }}
@@ -375,7 +383,8 @@ const Meeting = () => {
               sub.stream.typeOfVideo !== 'SCREEN' && (
                 <div
                   key={i}
-                  className="stream-container"
+                  id="stream-container"
+                  className={`${mainStreamManager ? 'w-60' : ''}`}
                   onClick={() => {
                     // handleMainVideoStream(sub)
                   }}
