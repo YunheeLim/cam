@@ -13,6 +13,19 @@ import SettingIcon from '../../../../public/svgs/setting.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 
+declare global {
+  interface ImageCapture {
+    new (videoTrack: MediaStreamTrack): ImageCapture;
+    takePhoto(): Promise<Blob>;
+    grabFrame(): Promise<ImageBitmap>;
+  }
+
+  var ImageCapture: {
+    prototype: ImageCapture;
+    new (videoTrack: MediaStreamTrack): ImageCapture;
+  };
+}
+
 const DATA = {
   user_name: '홍길동',
 };
@@ -53,45 +66,11 @@ const Preview = () => {
       if (videoRef?.current) {
         videoRef.current.srcObject = mediaStream;
       }
+      detectChanges();
     } catch (error) {
       console.log('Failed to access media devices', error);
     }
   };
-
-  // useEffect(() => {
-  //     if (isCameraOn) {
-  //         console.log('camera on')
-  //         console.log(stream?.getVideoTracks())
-
-  //         stream?.getVideoTracks().forEach((track) => (track.enabled = isCameraOn));
-
-  //         getMedia();
-  //     } else {
-  //         console.log('camera off')
-  //         console.log(stream?.getVideoTracks())
-
-  //         stream?.getVideoTracks().forEach((track) => (track.enabled = isCameraOn));
-  //         // stream?.getVideoTracks().forEach((track) => (track.stop()));
-
-  //     }
-  // }, [isCameraOn]);
-
-  // useEffect(() => {
-  //     if (isMicOn) {
-  //         console.log('mic on');
-  //         console.log(stream?.getAudioTracks())
-
-  //         stream?.getAudioTracks().forEach((track) => (track.enabled = isMicOn));
-
-  //         getMedia();
-  //     } else {
-  //         console.log('mic off');
-  //         console.log(stream?.getAudioTracks())
-  //         stream?.getAudioTracks().forEach((track) => (track.enabled = isMicOn));
-  //         // stream?.getAudioTracks().forEach((track) => (track.stop()));
-
-  //     }
-  // }, [isMicOn]);
 
   const handleCameraClick = () => {
     setIsCameraOn(prevState => !prevState);
@@ -111,8 +90,92 @@ const Preview = () => {
     router.push(
       `/meeting/${sessionId}?nickName=${nickName ? nickName : DATA.user_name}`,
     );
+  };
 
-    // router.push(`/test_meeting`);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null); // Captured image state
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const prevFrameData = useRef<ImageData | null>(null);
+
+  const handleCapture = async () => {
+    if (stream) {
+      const videoTrack = stream.getVideoTracks()[0];
+      const imageCapture = new ImageCapture(videoTrack);
+      try {
+        const blob = await imageCapture.takePhoto();
+        const url = URL.createObjectURL(blob);
+        setCapturedImage(url); // Update state with the image URL
+
+        // downloadImage(url, 'capture.png');
+        console.log(blob);
+      } catch (error) {
+        console.error('Error capturing image:', error);
+      }
+    }
+  };
+
+  const detectChanges = async () => {
+    if (!canvasRef.current || !videoRef.current) return;
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    const track = stream?.getVideoTracks()[0];
+    if (!track) return;
+
+    const imageCapture = new (window as any).ImageCapture(track);
+
+    const checkFrame = async () => {
+      try {
+        const bitmap = await imageCapture.grabFrame();
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+
+        const currentFrameData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
+        if (
+          prevFrameData.current &&
+          hasFrameChanged(prevFrameData.current, currentFrameData)
+        ) {
+          console.log('Screen content changed, capturing...');
+          const capturedBlob = canvas.toDataURL('image/png');
+          setCapturedImage(capturedBlob);
+        }
+
+        prevFrameData.current = currentFrameData;
+      } catch (error) {
+        console.error('Error capturing frame:', error);
+      }
+
+      requestAnimationFrame(checkFrame);
+    };
+
+    requestAnimationFrame(checkFrame);
+  };
+
+  const hasFrameChanged = (prev: ImageData, current: ImageData) => {
+    const threshold = 10000; // Define a difference threshold
+    let diffCount = 0;
+
+    for (let i = 0; i < prev.data.length; i += 4) {
+      const rDiff = Math.abs(prev.data[i] - current.data[i]);
+      const gDiff = Math.abs(prev.data[i + 1] - current.data[i + 1]);
+      const bDiff = Math.abs(prev.data[i + 2] - current.data[i + 2]);
+
+      if (rDiff + gDiff + bDiff > 50) {
+        // If color difference is significant
+        diffCount++;
+      }
+
+      if (diffCount > threshold) return true; // If enough pixels have changed
+    }
+
+    return false;
   };
 
   return (
@@ -129,6 +192,8 @@ const Preview = () => {
           nickName={nickName}
           userName={DATA.user_name}
         />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+
         <div className="my-6 flex w-full flex-row justify-between">
           <div className="flex gap-4">
             <Control name={'camera'} OnClick={handleCameraClick}>
@@ -152,7 +217,16 @@ const Preview = () => {
           <Button onClick={handleJoinClick} className="basis-1/4">
             참가
           </Button>
+          <Button onClick={handleCapture} className="mt-4">
+            캡처
+          </Button>
         </div>
+        {capturedImage && ( // Show the captured image if available
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold">캡처된 이미지:</h2>
+            <img src={capturedImage} alt="Captured preview" className="mt-2" />
+          </div>
+        )}
       </div>
     </div>
   );
