@@ -13,19 +13,6 @@ import SettingIcon from '../../../../public/svgs/setting.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 
-declare global {
-  interface ImageCapture {
-    new (videoTrack: MediaStreamTrack): ImageCapture;
-    takePhoto(): Promise<Blob>;
-    grabFrame(): Promise<ImageBitmap>;
-  }
-
-  var ImageCapture: {
-    prototype: ImageCapture;
-    new (videoTrack: MediaStreamTrack): ImageCapture;
-  };
-}
-
 const DATA = {
   user_name: '홍길동',
 };
@@ -33,22 +20,22 @@ const DATA = {
 const Preview = () => {
   const router = useRouter();
   const params = useParams();
-  const {
-    videoRef,
-    stream,
-    setStream,
-    isCameraOn,
-    setIsCameraOn,
-    isMicOn,
-    setIsMicOn,
-  } = useVideo();
+  // const {
+  //   videoRef,
+  //   stream,
+  //   setStream,
+  //   isCameraOn,
+  //   setIsCameraOn,
+  //   isMicOn,
+  //   setIsMicOn,
+  // } = useVideo();
 
-  // const [isCameraOn, setIsCameraOn] = useState(true);
-  // const [isMicOn, setIsMicOn] = useState(true);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isMicOn, setIsMicOn] = useState(true);
   const [sessionId, setSessionId] = useState<string | string[]>('');
   const [nickName, setNickName] = useState<string>(DATA.user_name);
-  // const [stream, setStream] = useState<MediaStream | null>(null);
-  // const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     console.log('session id', params.id);
@@ -66,7 +53,6 @@ const Preview = () => {
       if (videoRef?.current) {
         videoRef.current.srcObject = mediaStream;
       }
-      detectChanges();
     } catch (error) {
       console.log('Failed to access media devices', error);
     }
@@ -92,28 +78,13 @@ const Preview = () => {
     );
   };
 
-  const [capturedImage, setCapturedImage] = useState<string | null>(null); // Captured image state
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const prevFrameData = useRef<ImageData | null>(null);
+  // const animationFrameId = useRef<number | null>(null); // To store the animation frame ID
+  const intervalIdRef = useRef<number | null>(null);
 
-  const handleCapture = async () => {
-    if (stream) {
-      const videoTrack = stream.getVideoTracks()[0];
-      const imageCapture = new ImageCapture(videoTrack);
-      try {
-        const blob = await imageCapture.takePhoto();
-        const url = URL.createObjectURL(blob);
-        setCapturedImage(url); // Update state with the image URL
-
-        // downloadImage(url, 'capture.png');
-        console.log(blob);
-      } catch (error) {
-        console.error('Error capturing image:', error);
-      }
-    }
-  };
-
-  const detectChanges = async () => {
+  const detectChanges = () => {
     if (!canvasRef.current || !videoRef.current) return;
 
     const canvas = canvasRef.current;
@@ -151,11 +122,11 @@ const Preview = () => {
       } catch (error) {
         console.error('Error capturing frame:', error);
       }
-
-      requestAnimationFrame(checkFrame);
+      // requestAnimationFrame(checkFrame);
     };
+    //  requestAnimationFrame(checkFrame);
 
-    requestAnimationFrame(checkFrame);
+    intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
   };
 
   const hasFrameChanged = (prev: ImageData, current: ImageData) => {
@@ -178,6 +149,22 @@ const Preview = () => {
     return false;
   };
 
+  useEffect(() => {
+    if (stream) {
+      detectChanges();
+    }
+    return () => {
+      prevFrameData.current = null;
+
+      // Cleanup requestAnimationFrame on component unmount
+      if (intervalIdRef.current) {
+        console.log('========cleanup 1=========');
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null; // Clear the interval ID
+      }
+    };
+  }, [stream]);
+
   return (
     <div className="relative flex w-full flex-col items-center px-6">
       <div className="absolute top-1/20 flex w-full max-w-515 flex-col items-center">
@@ -192,7 +179,12 @@ const Preview = () => {
           nickName={nickName}
           userName={DATA.user_name}
         />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <canvas
+          ref={canvasRef}
+          width={640}
+          height={480}
+          style={{ display: 'none' }}
+        ></canvas>
 
         <div className="my-6 flex w-full flex-row justify-between">
           <div className="flex gap-4">
@@ -217,14 +209,11 @@ const Preview = () => {
           <Button onClick={handleJoinClick} className="basis-1/4">
             참가
           </Button>
-          <Button onClick={handleCapture} className="mt-4">
-            캡처
-          </Button>
         </div>
-        {capturedImage && ( // Show the captured image if available
-          <div className="mt-4">
-            <h2 className="text-lg font-semibold">캡처된 이미지:</h2>
-            <img src={capturedImage} alt="Captured preview" className="mt-2" />
+        {capturedImage && (
+          <div>
+            <h2>Captured Image:</h2>
+            <img src={capturedImage} alt="Captured screen" />
           </div>
         )}
       </div>

@@ -19,10 +19,20 @@ import Video from '@/components/Video';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UserVideoComponent from './UserVideoComponent';
 import OpenViduVideoComponent from './OvVideo';
-
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
+declare global {
+  interface ImageCapture {
+    new (videoTrack: MediaStreamTrack): ImageCapture;
+    takePhoto(): Promise<Blob>;
+    grabFrame(): Promise<ImageBitmap>;
+  }
 
+  var ImageCapture: {
+    prototype: ImageCapture;
+    new (videoTrack: MediaStreamTrack): ImageCapture;
+  };
+}
 // OpenVidu global variables
 let OVCamera: any;
 let OVScreen: any;
@@ -49,6 +59,9 @@ const Meeting = () => {
 
   const { videoRef, stream, isCameraOn, setIsCameraOn, isMicOn, setIsMicOn } =
     useVideo();
+  const [capturedImage, setCapturedImage] = useState<string | null>(null); // 캡쳐 이미지
+  const canvasRef = useRef<HTMLCanvasElement>(null); // 프레임 변화 감지를 위한 canvas
+  const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
 
   useEffect(() => {
     if (videoRef.current) {
@@ -76,8 +89,9 @@ const Meeting = () => {
     }
   };
 
-  const handleOcrClick = () => {
+  const handleOcrClick = async () => {
     setIsOcrOn(prevState => !prevState);
+    detectChanges();
   };
 
   const [mySessionId, setMySessionId] = useState<string>('SessionA');
@@ -239,6 +253,7 @@ const Meeting = () => {
             setScreenSession(sessionScreen);
             setScreenPublisher(publisher);
             setScreenSharing(true);
+            detectChanges(); // 공유된 화면의 프레임 변화 감지
           });
 
           publisher?.once('accessDenied', event => {
@@ -337,6 +352,111 @@ const Meeting = () => {
     return response.data;
   };
 
+  // const handleCapture = async () => {
+  //   if (
+  //     mainStreamManager &&
+  //     mainStreamManager.stream.typeOfVideo === 'SCREEN'
+  //   ) {
+  //     const videoTrack = mainStreamManager.stream
+  //       .getMediaStream()
+  //       .getVideoTracks()[0];
+  //     const imageCapture = new ImageCapture(videoTrack);
+
+  //     try {
+  //       const bitmap = await imageCapture.grabFrame(); // Use grabFrame instead of takePhoto
+  //       const canvas = document.createElement('canvas');
+  //       canvas.width = bitmap.width;
+  //       canvas.height = bitmap.height;
+  //       const context = canvas.getContext('2d');
+  //       if (context) {
+  //         context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+  //         const capturedUrl = canvas.toDataURL('image/png'); // Convert to image URL
+  //         setCapturedImage(capturedUrl);
+  //         console.log('Captured screen share image via grabFrame');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error capturing screen share:', error);
+  //     }
+  //   } else {
+  //     console.log('MainStreamManager is not a screen share stream.');
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (mainStreamManager?.stream) {
+  //     detectChanges();
+  //   }
+  // }, [mainStreamManager?.stream]);
+
+  const detectChanges = async () => {
+    console.log('detect change called');
+    if (!canvasRef.current || !mainStreamManager) return;
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    const track = mainStreamManager?.stream
+      ?.getMediaStream()
+      ?.getVideoTracks()[0];
+    if (!track) return;
+
+    const imageCapture = new ImageCapture(track);
+
+    const checkFrame = async () => {
+      try {
+        const bitmap = await imageCapture.grabFrame();
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+
+        const currentFrameData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
+        if (
+          prevFrameData.current &&
+          hasFrameChanged(prevFrameData.current, currentFrameData)
+        ) {
+          console.log('Screen content changed, capturing...');
+          const capturedBlob = canvas.toDataURL('image/png');
+          setCapturedImage(capturedBlob);
+          console.log(capturedBlob);
+        }
+
+        prevFrameData.current = currentFrameData;
+      } catch (error) {
+        console.error('Error capturing frame:', error);
+      }
+
+      requestAnimationFrame(checkFrame);
+    };
+
+    requestAnimationFrame(checkFrame);
+  };
+
+  const hasFrameChanged = (prev: ImageData, current: ImageData) => {
+    const threshold = 10000; // Define a difference threshold
+    let diffCount = 0;
+
+    for (let i = 0; i < prev.data.length; i += 4) {
+      const rDiff = Math.abs(prev.data[i] - current.data[i]);
+      const gDiff = Math.abs(prev.data[i + 1] - current.data[i + 1]);
+      const bDiff = Math.abs(prev.data[i + 2] - current.data[i + 2]);
+
+      if (rDiff + gDiff + bDiff > 50) {
+        // If color difference is significant
+        diffCount++;
+      }
+
+      if (diffCount > threshold) return true; // If enough pixels have changed
+    }
+
+    return false;
+  };
+
   return (
     <div className="flex h-full w-full flex-col justify-center bg-black">
       <div
@@ -349,9 +469,12 @@ const Meeting = () => {
        justify-center px-6`}
       >
         {mainStreamManager && (
-          <div id="main-video" className="w-4/6">
-            <UserVideoComponent streamManager={mainStreamManager} />
-          </div>
+          <>
+            <div id="main-video" className="w-4/6">
+              <UserVideoComponent streamManager={mainStreamManager} />
+            </div>
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+          </>
         )}
         <div
           id="video-container"
@@ -398,6 +521,11 @@ const Meeting = () => {
           })}
         </div>
       </div>
+      {capturedImage && ( // Show the captured image if available
+        <div className="mt-4 h-80 w-80">
+          <img src={capturedImage} alt="Captured preview" className="mt-2" />
+        </div>
+      )}
       {/* Bottom bar */}
       <div className="relative flex h-24 w-full flex-row justify-between p-6">
         <div className="flex gap-4">
