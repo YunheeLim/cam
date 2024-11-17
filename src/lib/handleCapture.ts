@@ -35,7 +35,7 @@ const handleCapture = async (mainStreamManager: StreamManager) => {
             // ocr api
             try {
               const ocrResult = await getOcrText(base64String);
-              console.log('OCR Result:', ocrResult);
+              console.log('formatted OCR Result:', ocrResult);
             } catch (error) {
               console.error('Failed to get OCR text:', error);
             }
