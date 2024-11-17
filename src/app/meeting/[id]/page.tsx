@@ -9,8 +9,8 @@ import CameraOn from '../../../../public/svgs/camera_on.svg';
 import CameraOff from '../../../../public/svgs/camera_off.svg';
 import MicOn from '../../../../public/svgs/mic_on.svg';
 import MicOff from '../../../../public/svgs/mic_off.svg';
-import SpeakerOn from '../../../../public/svgs/speaker_on.svg';
-import SpeakerOff from '../../../../public/svgs/speaker_off.svg';
+// import SpeakerOn from '../../../../public/svgs/speaker_on.svg';
+// import SpeakerOff from '../../../../public/svgs/speaker_off.svg';
 import ScreenShareIcon from '../../../../public/svgs/screenshare.svg';
 import SettingIcon from '../../../../public/svgs/setting.svg';
 import PeopleIcon from '../../../../public/svgs/people.svg';
@@ -21,6 +21,10 @@ import UserVideoComponent from './UserVideoComponent';
 import OpenViduVideoComponent from './OvVideo';
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
+import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
+import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
+import blobToBase64 from '@/lib/blobToBase64';
+
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -62,6 +66,8 @@ const Meeting = () => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null); // 캡쳐 이미지
   const canvasRef = useRef<HTMLCanvasElement>(null); // 프레임 변화 감지를 위한 canvas
   const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
+  const intervalIdRef = useRef<number | null>(null);
+  const sharedScreenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -90,8 +96,23 @@ const Meeting = () => {
   };
 
   const handleOcrClick = async () => {
-    setIsOcrOn(prevState => !prevState);
-    detectChanges();
+    if (mainStreamManager) {
+      if (isOcrOn) {
+        setIsOcrOn(false);
+
+        prevFrameData.current = null;
+
+        // Cleanup requestAnimationFrame on component unmount
+        if (intervalIdRef.current) {
+          console.log('========cleanup 1=========');
+          clearInterval(intervalIdRef.current);
+          intervalIdRef.current = null; // Clear the interval ID
+        }
+      } else {
+        setIsOcrOn(true);
+        detectChanges();
+      }
+    }
   };
 
   const [mySessionId, setMySessionId] = useState<string>('SessionA');
@@ -352,6 +373,48 @@ const Meeting = () => {
     return response.data;
   };
 
+  const handleCapture = async () => {
+    if (mainStreamManager?.stream) {
+      const videoTrack = mainStreamManager?.stream
+        ?.getMediaStream()
+        .getVideoTracks()[0];
+      const imageCapture = new ImageCapture(videoTrack);
+
+      try {
+        const imageBitmap = await imageCapture.grabFrame();
+
+        // Create a canvas to draw the frame and convert it to a Blob
+        const canvas = document.createElement('canvas');
+        canvas.width = imageBitmap.width;
+        canvas.height = imageBitmap.height;
+        const context = canvas.getContext('2d');
+        if (context) {
+          context.drawImage(imageBitmap, 0, 0);
+          canvas.toBlob(async blob => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              // 생성된 blob 확인
+              console.log('blob:', blob);
+
+              const base64Data = await blobToBase64(blob);
+              // Remove the "data:image/png;base64," prefix
+              const base64String = base64Data.split(',')[1];
+
+              // 캡쳐 확인 테스트용
+              window.open(url, '_blank');
+            } else {
+              console.error('Failed to create Blob from canvas');
+            }
+          });
+        } else {
+          console.error('Failed to get canvas 2D context');
+        }
+      } catch (error) {
+        console.error('Error capturing image:', error);
+      }
+    }
+  };
+
   // const handleCapture = async () => {
   //   if (
   //     mainStreamManager &&
@@ -372,7 +435,7 @@ const Meeting = () => {
   //         context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
   //         const capturedUrl = canvas.toDataURL('image/png'); // Convert to image URL
   //         setCapturedImage(capturedUrl);
-  //         console.log('Captured screen share image via grabFrame');
+  //         console.log(capturedUrl);
   //       }
   //     } catch (error) {
   //       console.error('Error capturing screen share:', error);
@@ -381,12 +444,6 @@ const Meeting = () => {
   //     console.log('MainStreamManager is not a screen share stream.');
   //   }
   // };
-
-  // useEffect(() => {
-  //   if (mainStreamManager?.stream) {
-  //     detectChanges();
-  //   }
-  // }, [mainStreamManager?.stream]);
 
   const detectChanges = async () => {
     console.log('detect change called');
@@ -430,11 +487,9 @@ const Meeting = () => {
       } catch (error) {
         console.error('Error capturing frame:', error);
       }
-
-      requestAnimationFrame(checkFrame);
     };
 
-    requestAnimationFrame(checkFrame);
+    intervalIdRef.current = window.setInterval(checkFrame, 3000); // 1-second interval
   };
 
   const hasFrameChanged = (prev: ImageData, current: ImageData) => {
@@ -457,6 +512,36 @@ const Meeting = () => {
     return false;
   };
 
+  useEffect(() => {
+    return () => {
+      prevFrameData.current = null;
+
+      // Cleanup requestAnimationFrame on component unmount
+      if (intervalIdRef.current) {
+        console.log('========cleanup 2=========');
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null; // Clear the interval ID
+      }
+    };
+  }, [mainStreamManager?.stream]);
+
+  // const handleCapture = () => {
+  //   if (!canvasRef.current || !sharedScreenRef.current) return;
+
+  //   const canvas = canvasRef.current;
+  //   const context = canvas.getContext('2d');
+  //   if (!context) return;
+
+  //   const screen = sharedScreenRef.current;
+  //   canvas.width = screen.videoWidth;
+  //   canvas.height = screen.videoHeight;
+  //   context.drawImage(screen, 0, 0, screen.videoWidth, screen.videoHeight);
+
+  //   const capturedBlob = canvas.toDataURL('image/png');
+  //   setCapturedImage(capturedBlob);
+  //   console.log(capturedBlob);
+  // };
+
   return (
     <div className="flex h-full w-full flex-col justify-center bg-black">
       <div
@@ -470,7 +555,7 @@ const Meeting = () => {
       >
         {mainStreamManager && (
           <>
-            <div id="main-video" className="w-4/6">
+            <div id="main-video" ref={sharedScreenRef} className="w-4/6">
               <UserVideoComponent streamManager={mainStreamManager} />
             </div>
             <canvas ref={canvasRef} style={{ display: 'none' }} />
@@ -521,7 +606,8 @@ const Meeting = () => {
           })}
         </div>
       </div>
-      {capturedImage && ( // Show the captured image if available
+      {/* 픽셀 변화 감지 확인용 */}
+      {capturedImage && intervalIdRef.current && (
         <div className="mt-4 h-80 w-80">
           <img src={capturedImage} alt="Captured preview" className="mt-2" />
         </div>
@@ -535,9 +621,24 @@ const Meeting = () => {
           <Control name="mic" OnClick={handleMicClick}>
             {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
           </Control>
-          <Control name="speaker" OnClick={handleOcrClick}>
-            {isOcrOn ? <SpeakerOn /> : <SpeakerOff />}
-          </Control>
+          <Button
+            name="speaker"
+            onClick={handleOcrClick}
+            className="gap-2 px-2"
+          >
+            {isOcrOn ? (
+              <>
+                <SpeakerOn size={32} color="white" />{' '}
+                <div className="">공유화면 읽기</div>
+              </>
+            ) : (
+              <>
+                <SpeakerOff size={32} color="white" />
+                <div className="">공유화면 읽기</div>
+              </>
+            )}
+          </Button>
+          <Button onClick={handleCapture}>ocr test</Button>
         </div>
         <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
           <Button onClick={publishScreenShare} className="p-2">
