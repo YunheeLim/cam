@@ -24,7 +24,7 @@ import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
 import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
-import getSpeech from '@/lib/getSpeech';
+import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -469,11 +469,17 @@ const Meeting = () => {
       const textData = await getText(mainStreamManager);
       if (typeof textData === 'string') {
         getText(textData);
-        getSpeech(textData);
+        getSpeechForOne(textData);
       }
       console.log('text in handlecapture', textData);
     }
   };
+
+  // useEffect(() => {
+  //   getSpeechForBoth(
+  //     '한국어 영어 혼합 × SLR클럽 http://www.slrclub com> 자유게시판 chatGPT 실제 필요한 곳에 사용해 봤습니다. 2023. 2. 14. - 이렇게 하면 GTTS가 문장의 한글 부분을 한국어로 발음하고, 영어 부분은 영어로 발음합니 다. 이와 같은 방식으로, 다른 언어도 혼합해서 사용할 수 GitHub https://joungheekim.github.io > 2021/04/01 ) code-review [코드리뷰]타코트론2 TTS 시스템 1/2 2021. 4. 1.- 따라서 직접 음성과 스크립트를 제작할 때 이를 반영하여 미리 영어, 숫자, 특수문자등을 한글 로 작성하는 것을 추천드립니다. 스크립트 예시. 1.3 녹음된 티스토리 https://music-audio-aitistory.com> [논문들소개] Neural Text-to-Speech(TTS) 2022. 8. 19. - Text-to-Speech(보통 TTS라고 줄여서 씀)는 텍스트를 오디오로 읽어주는 기술을 말함. 즉 입력으로 텍스트 혹은 캐릭터와 비스무리한게 들어오면 출력 Korea Science KS http://www.koreascience.kr article CFKO2018... PDF : 음성합성을 위한 텍스트 음역 시스템과 숫자 음역 모호성 처리 JY Park 저술 2018-TTS(Text-to-Speech)는 문자 텍스트가 입력되었을 때,. 이를 자동으로 음성 변환 하여 출력해주는 음성합성 기술. 을 말한다. TTS는 현재 기술의 완성도가 높아짐에 네이버 지식iN https://kin. .naver.com > qna > detail : balabolka (TTS프로그램) 한 : 네이버 지식iN 우리나라 말과 영어가 혼합된 것이라면 듣기가 조금 불편할 수도 있습니다. 영어면 원래 영어로 셋팅하고 한국',
+  //   );
+  // }, []);
 
   return (
     <div className="flex h-full w-full flex-col justify-center bg-black">

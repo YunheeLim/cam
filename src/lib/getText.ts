@@ -63,7 +63,7 @@ const getText = async (mainStreamManager: StreamManager) => {
           const base64String = base64Data.split(',')[1];
 
           // 캡쳐 확인 테스트용
-          window.open(url, '_blank');
+          // window.open(url, '_blank');
 
           // ocr api
           try {

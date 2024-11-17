@@ -23,6 +23,7 @@
     "express": "^4.21.1",
     "firebase": "^10.14.1",
     "firebase-admin": "^12.6.0",
+    "franc": "^6.2.0",
     "jquery": "^3.7.1",
     "next": "14.2.15",
     "openvidu-browser": "^2.30.1",
