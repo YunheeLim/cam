@@ -24,6 +24,7 @@ import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
 import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
+import getSpeech from '@/lib/getSpeech';
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -67,6 +68,8 @@ const Meeting = () => {
   const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
   const intervalIdRef = useRef<number | null>(null);
   const sharedScreenRef = useRef<HTMLDivElement>(null);
+
+  const [text, setText] = useState('');
 
   useEffect(() => {
     if (videoRef.current) {
@@ -258,6 +261,7 @@ const Meeting = () => {
             'html-element-id',
             {
               videoSource: 'screen',
+              publishAudio: false,
             },
           );
 
@@ -439,6 +443,7 @@ const Meeting = () => {
     return false;
   };
 
+  // 프레임 감지 클린업
   useEffect(() => {
     return () => {
       prevFrameData.current = null;
@@ -452,10 +457,21 @@ const Meeting = () => {
     };
   }, [mainStreamManager?.stream]);
 
+  // tts 클린업
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, [text]);
+
   const handleCapture = async () => {
     if (mainStreamManager) {
-      const text = await getText(mainStreamManager);
-      console.log('text in handlecapture', text);
+      const textData = await getText(mainStreamManager);
+      if (typeof textData === 'string') {
+        getText(textData);
+        getSpeech(textData);
+      }
+      console.log('text in handlecapture', textData);
     }
   };
 

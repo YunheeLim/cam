@@ -48,34 +48,37 @@ const getText = async (mainStreamManager: StreamManager) => {
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(imageBitmap, 0, 0);
-        canvas.toBlob(async blob => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            // 생성된 blob 확인
-            console.log('blob:', blob);
 
-            const base64Data = await blobToBase64(blob);
-            // Remove the "data:image/png;base64," prefix
-            const base64String = base64Data.split(',')[1];
+        const blob = await new Promise<Blob | null>(resolve =>
+          canvas.toBlob(resolve),
+        );
 
-            // 캡쳐 확인 테스트용
-            window.open(url, '_blank');
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          // 생성된 blob 확인
+          console.log('blob:', blob);
 
-            // ocr api
-            try {
-              const ocrResult = await getOcrText(base64String);
-              const extractedText = ocrResult.images[0].fields
-                .map((item: fieldType) => item.inferText)
-                .join(' ');
-              console.log('formatted OCR Result:', extractedText);
-              return extractedText;
-            } catch (error) {
-              console.error('Failed to get OCR text:', error);
-            }
-          } else {
-            console.error('Failed to create Blob from canvas');
+          const base64Data = await blobToBase64(blob);
+          // Remove the "data:image/png;base64," prefix
+          const base64String = base64Data.split(',')[1];
+
+          // 캡쳐 확인 테스트용
+          window.open(url, '_blank');
+
+          // ocr api
+          try {
+            const ocrResult = await getOcrText(base64String);
+            const extractedText = ocrResult.images[0].fields
+              .map((item: fieldType) => item.inferText)
+              .join(' ');
+            console.log('formatted OCR Result:', extractedText);
+            return extractedText;
+          } catch (error) {
+            console.error('Failed to get OCR text:', error);
           }
-        });
+        } else {
+          console.error('Failed to create Blob from canvas');
+        }
       } else {
         console.error('Failed to get canvas 2D context');
       }

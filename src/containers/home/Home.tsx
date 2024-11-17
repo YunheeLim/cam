@@ -6,7 +6,6 @@ import Accessibility from './Accessibility';
 import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import getSpeech from '@/lib/getSpeech';
 
 const Home = () => {
   const router = useRouter();
@@ -60,10 +59,6 @@ const Home = () => {
   const formattedHours = hours % 12 || 12; // Convert to 12-hour format
   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes; // Add leading zero if needed
   const formattedTime = `${formattedHours} : ${formattedMinutes} ${ampm}`;
-
-  useEffect(() => {
-    getSpeech('안녕하세요');
-  }, []);
 
   return (
     <div className="flex h-full w-full flex-row items-center justify-center">
