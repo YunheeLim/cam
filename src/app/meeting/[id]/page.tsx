@@ -23,10 +23,7 @@ import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
 import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
-import blobToBase64 from '@/lib/blobToBase64';
-import getOcrText from '@/lib/getOcr';
-import handleCapture from '@/lib/handleCapture';
-
+import getText from '@/lib/getText';
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -375,56 +372,6 @@ const Meeting = () => {
     return response.data;
   };
 
-  // const handleCapture = async () => {
-  //   if (mainStreamManager?.stream) {
-  //     const videoTrack = mainStreamManager?.stream
-  //       ?.getMediaStream()
-  //       .getVideoTracks()[0];
-  //     const imageCapture = new ImageCapture(videoTrack);
-
-  //     try {
-  //       const imageBitmap = await imageCapture.grabFrame();
-
-  //       // Create a canvas to draw the frame and convert it to a Blob
-  //       const canvas = document.createElement('canvas');
-  //       canvas.width = imageBitmap.width;
-  //       canvas.height = imageBitmap.height;
-  //       const context = canvas.getContext('2d');
-  //       if (context) {
-  //         context.drawImage(imageBitmap, 0, 0);
-  //         canvas.toBlob(async blob => {
-  //           if (blob) {
-  //             const url = URL.createObjectURL(blob);
-  //             // 생성된 blob 확인
-  //             console.log('blob:', blob);
-
-  //             const base64Data = await blobToBase64(blob);
-  //             // Remove the "data:image/png;base64," prefix
-  //             const base64String = base64Data.split(',')[1];
-
-  //             // 캡쳐 확인 테스트용
-  //             window.open(url, '_blank');
-
-  //             // ocr api
-  //             try {
-  //               const ocrResult = await getOcrText(base64String);
-  //               console.log('OCR Result:', ocrResult);
-  //             } catch (error) {
-  //               console.error('Failed to get OCR text:', error);
-  //             }
-  //           } else {
-  //             console.error('Failed to create Blob from canvas');
-  //           }
-  //         });
-  //       } else {
-  //         console.error('Failed to get canvas 2D context');
-  //       }
-  //     } catch (error) {
-  //       console.error('Error capturing image:', error);
-  //     }
-  //   }
-  // };
-
   const detectChanges = async () => {
     console.log('detect change called');
     if (!canvasRef.current || !mainStreamManager) return;
@@ -504,6 +451,13 @@ const Meeting = () => {
       }
     };
   }, [mainStreamManager?.stream]);
+
+  const handleCapture = async () => {
+    if (mainStreamManager) {
+      const text = await getText(mainStreamManager);
+      console.log('text in handlecapture', text);
+    }
+  };
 
   return (
     <div className="flex h-full w-full flex-col justify-center bg-black">
@@ -601,13 +555,7 @@ const Meeting = () => {
               </>
             )}
           </Button>
-          <Button
-            onClick={() =>
-              mainStreamManager ? handleCapture(mainStreamManager) : ''
-            }
-          >
-            ocr test
-          </Button>
+          <Button onClick={handleCapture}>ocr test</Button>
         </div>
         <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
           <Button onClick={publishScreenShare} className="p-2">

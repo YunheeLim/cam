@@ -1,8 +1,37 @@
 import blobToBase64 from './blobToBase64';
 import { StreamManager } from 'openvidu-browser';
 import getOcrText from './getOcr';
+import { useState, useEffect } from 'react';
 
-const handleCapture = async (mainStreamManager: StreamManager) => {
+interface fieldType {
+  inferConfidence: number;
+  inferText: string;
+  lineBreak: boolean;
+  type: string;
+  valueType: string;
+}
+interface imageType {
+  convertedImageInfo: {
+    height: number;
+    longImage: boolean;
+    pageIndex: number;
+    width: number;
+  };
+  fields: fieldType[];
+  inferResult: string;
+  message: string;
+  name: string;
+  uid: string;
+}
+
+interface itemType {
+  images: imageType[];
+  requestId: string;
+  timestamp: number;
+  version: string;
+}
+
+const getText = async (mainStreamManager: StreamManager) => {
   if (mainStreamManager?.stream) {
     const videoTrack = mainStreamManager?.stream
       ?.getMediaStream()
@@ -35,7 +64,11 @@ const handleCapture = async (mainStreamManager: StreamManager) => {
             // ocr api
             try {
               const ocrResult = await getOcrText(base64String);
-              console.log('formatted OCR Result:', ocrResult);
+              const extractedText = ocrResult.images[0].fields
+                .map((item: fieldType) => item.inferText)
+                .join(' ');
+              console.log('formatted OCR Result:', extractedText);
+              return extractedText;
             } catch (error) {
               console.error('Failed to get OCR text:', error);
             }
@@ -52,4 +85,4 @@ const handleCapture = async (mainStreamManager: StreamManager) => {
   }
 };
 
-export default handleCapture;
+export default getText;
