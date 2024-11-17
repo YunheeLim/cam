@@ -62,8 +62,8 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
                 {getNicknameTag()[0]}
               </div>
             )}
-            {/* 마이크 off */}
-            {!audioActive && (
+            {/* 마이크 off (공유 화면은 제외) */}
+            {!audioActive && streamManager.stream.typeOfVideo !== 'SCREEN' && (
               <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
                 <MicOff width={16} height={16} />
               </div>
