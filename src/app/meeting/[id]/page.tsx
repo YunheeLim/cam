@@ -9,6 +9,7 @@ import CameraOn from '../../../../public/svgs/camera_on.svg';
 import CameraOff from '../../../../public/svgs/camera_off.svg';
 import MicOn from '../../../../public/svgs/mic_on.svg';
 import MicOff from '../../../../public/svgs/mic_off.svg';
+import { RiSpeakLine } from 'react-icons/ri';
 // import SpeakerOn from '../../../../public/svgs/speaker_on.svg';
 // import SpeakerOff from '../../../../public/svgs/speaker_off.svg';
 import ScreenShareIcon from '../../../../public/svgs/screenshare.svg';
@@ -26,6 +27,9 @@ import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useRouterRefresh } from '@/hooks/useRouterRefresh';
+import { useBeforeUnload } from 'react-use';
+import Router from 'next/router';
 
 declare global {
   interface ImageCapture {
@@ -71,7 +75,29 @@ const Meeting = () => {
   const intervalIdRef = useRef<number | null>(null);
   const sharedScreenRef = useRef<HTMLDivElement>(null);
 
-  const [text, setText] = useState('');
+  const [text, setText] = useState(''); // ocr 텍스트
+  const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
+  const [isReading, setIsReading] = useState(false); // ocr 텍스트 리딩 상태
+  const refresh = useRouterRefresh(); // 새로고침 감지
+
+  // 단축키 설정 정보
+  useEffect(() => {
+    if (window.sessionStorage.getItem('shortcut') === 'true') {
+      setIsShortcut(true);
+    }
+  }, [window.sessionStorage.getItem('shortcut')]);
+
+  // 새로고침 시 메인 페이지로
+  useEffect(() => {
+    if (window.sessionStorage.getItem('firstLoadDone') === null) {
+      console.log('첫 로드');
+      window.sessionStorage.setItem('firstLoadDone', '1');
+    } else {
+      console.log('리로드');
+      window.sessionStorage.removeItem('firstLoadDone');
+      router.replace('/');
+    }
+  }, []);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -85,6 +111,7 @@ const Meeting = () => {
     }
   }, [videoRef, stream]);
 
+  // 카메라 mute/unmute
   const handleCameraClick = () => {
     if (publisher) {
       setIsCameraOn(prevState => !prevState);
@@ -92,10 +119,12 @@ const Meeting = () => {
     }
   };
 
+  // 비디오 디바이스 선택
   const handleCameraDeviceClick = () => {
     console.log(videoDeviceList);
   };
 
+  // 마이크 mute/unmute
   const handleMicClick = () => {
     if (publisher) {
       setIsMicOn(prevState => !prevState);
@@ -103,10 +132,12 @@ const Meeting = () => {
     }
   };
 
+  // 오디오 디바이스 선택
   const handleMicDeviceClick = () => {
     console.log(audioDeviceList);
   };
 
+  // 프레임 변화 시 자동 감지 되는 ocr
   const handleOcrClick = async () => {
     if (mainStreamManager) {
       if (isOcrOn) {
@@ -365,7 +396,7 @@ const Meeting = () => {
     setSubscribers([]);
     setMySessionId('SessionA');
     setMyUserName('참여자' + Math.floor(Math.random() * 100));
-    setMainStreamManager(undefined);
+    setMainStreamManager(null);
 
     setPublisher(undefined);
     setScreenPublisher(undefined);
@@ -520,18 +551,26 @@ const Meeting = () => {
 
   // 공유 화면 캡쳐
   const handleCapture = async () => {
-    if (mainStreamManager) {
-      const textData = await getText(mainStreamManager);
-      if (typeof textData === 'string') {
-        getText(textData);
-        getSpeechForOne(textData);
+    if (mainStreamManager && isReading) {
+      setIsReading(false);
+      window.speechSynthesis.cancel();
+      // 읽는 중일 때 멈추기
+    } else {
+      // 읽기 시작
+      if (mainStreamManager) {
+        setIsReading(true);
+        const textData = await getText(mainStreamManager);
+        if (typeof textData === 'string') {
+          getText(textData);
+          getSpeechForOne(textData);
+        }
+        console.log('text in handlecapture', textData);
       }
-      console.log('text in handlecapture', textData);
     }
   };
 
   // 화면 캡쳐 및 ocr 단축키
-  useHotkeys('ctrl+o', handleCapture);
+  useHotkeys('ctrl+o', handleCapture, { enabled: isShortcut });
 
   // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {
@@ -644,8 +683,15 @@ const Meeting = () => {
               </>
             )}
           </Button> */}
-          <Button onClick={handleCapture} className="px-2">
-            ocr test
+          <Button
+            onClick={handleCapture}
+            disabled={!mainStreamManager} // 버튼 비활성화
+            className={`gap-2 px-4 ${
+              mainStreamManager ? '' : 'text-gray-400 hover:bg-primary'
+            }`}
+          >
+            <RiSpeakLine size={32} />
+            {isReading ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
           </Button>
         </div>
         <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">

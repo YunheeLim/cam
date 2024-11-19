@@ -149,21 +149,21 @@ const Preview = () => {
     return false;
   };
 
-  useEffect(() => {
-    if (stream) {
-      detectChanges();
-    }
-    return () => {
-      prevFrameData.current = null;
+  // useEffect(() => {
+  //   if (stream) {
+  //     detectChanges();
+  //   }
+  //   return () => {
+  //     prevFrameData.current = null;
 
-      // Cleanup requestAnimationFrame on component unmount
-      if (intervalIdRef.current) {
-        console.log('========cleanup 1=========');
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null; // Clear the interval ID
-      }
-    };
-  }, [stream]);
+  //     // Cleanup requestAnimationFrame on component unmount
+  //     if (intervalIdRef.current) {
+  //       console.log('========cleanup 1=========');
+  //       clearInterval(intervalIdRef.current);
+  //       intervalIdRef.current = null; // Clear the interval ID
+  //     }
+  //   };
+  // }, [stream]);
 
   return (
     <div className="relative flex w-full flex-col items-center px-6">
