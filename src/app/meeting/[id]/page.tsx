@@ -90,11 +90,19 @@ const Meeting = () => {
     }
   };
 
+  const handleCameraDeviceClick = () => {
+    console.log(videoDeviceList);
+  };
+
   const handleMicClick = () => {
     if (publisher) {
       setIsMicOn(prevState => !prevState);
       publisher.publishAudio(!isMicOn);
     }
+  };
+
+  const handleMicDeviceClick = () => {
+    console.log(audioDeviceList);
   };
 
   const handleOcrClick = async () => {
@@ -131,6 +139,8 @@ const Meeting = () => {
   const [screenSession, setScreenSession] = useState<Session>();
   const [screenPublisher, setScreenPublisher] = useState<Publisher>();
   const [screenSharing, setScreenSharing] = useState(false);
+  const [videoDeviceList, setVideoDeviceList] = useState([]);
+  const [audioDeviceList, setAudioDeviceList] = useState([]);
   const [currentVideoDevice, setCurrentVideoDevice] =
     useState<MediaDeviceInfo>();
 
@@ -214,9 +224,19 @@ const Meeting = () => {
     try {
       const token = await getToken();
       await newSession.connect(token, { clientData: myUserName });
+
+      // TODO: 기기 선택
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
-        audioSource: undefined,
-        videoSource: undefined,
+        audioSource: `${
+          myUserName === '홍길동'
+            ? '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
+            : 'da286a7707355b39637e3699f4dcdecee7ea2794cfdabf1ed6f73b7fd6b2cfee'
+        }`,
+        videoSource: `${
+          myUserName === '홍길동'
+            ? '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
+            : '2d6d38260a11a90ac2a0ec702e8e4a4c40910063f4eb3da8ade0454f599b2e54'
+        }`,
         publishAudio: true,
         publishVideo: true,
         resolution: '640x480',
@@ -234,6 +254,10 @@ const Meeting = () => {
           .getMediaStream()
           .getVideoTracks()[0]
           .getSettings().deviceId;
+
+        console.log('device list:', videoDevices);
+        setVideoDeviceList(videoDeviceList);
+
         const currentDevice = videoDevices?.find(
           device => device.deviceId === currentVideoDeviceId,
         );
@@ -248,6 +272,30 @@ const Meeting = () => {
       console.log('Error connecting to the session:', error);
     }
   };
+
+  // 비디오/오디오 기기 목록
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const devices = await OV.current?.getDevices();
+        if (devices) {
+          const videoDevices = devices.filter(
+            device => device.kind === 'videoinput',
+          );
+          setVideoDeviceList(videoDevices);
+
+          const audioDevices = devices.filter(
+            device => device.kind === 'audioinput',
+          );
+          setAudioDeviceList(audioDevices);
+        }
+      } catch (error) {
+        console.error('Error fetching devices:', error);
+      }
+    };
+
+    fetchDevices();
+  }, [joinSession]);
 
   const publishScreenShare = async () => {
     OVScreen.current = new OpenVidu();
@@ -475,6 +523,7 @@ const Meeting = () => {
     }
   };
 
+  // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {
   //   getSpeechForBoth(
   //     '한국어 영어 혼합 × SLR클럽 http://www.slrclub com> 자유게시판 chatGPT 실제 필요한 곳에 사용해 봤습니다. 2023. 2. 14. - 이렇게 하면 GTTS가 문장의 한글 부분을 한국어로 발음하고, 영어 부분은 영어로 발음합니 다. 이와 같은 방식으로, 다른 언어도 혼합해서 사용할 수 GitHub https://joungheekim.github.io > 2021/04/01 ) code-review [코드리뷰]타코트론2 TTS 시스템 1/2 2021. 4. 1.- 따라서 직접 음성과 스크립트를 제작할 때 이를 반영하여 미리 영어, 숫자, 특수문자등을 한글 로 작성하는 것을 추천드립니다. 스크립트 예시. 1.3 녹음된 티스토리 https://music-audio-aitistory.com> [논문들소개] Neural Text-to-Speech(TTS) 2022. 8. 19. - Text-to-Speech(보통 TTS라고 줄여서 씀)는 텍스트를 오디오로 읽어주는 기술을 말함. 즉 입력으로 텍스트 혹은 캐릭터와 비스무리한게 들어오면 출력 Korea Science KS http://www.koreascience.kr article CFKO2018... PDF : 음성합성을 위한 텍스트 음역 시스템과 숫자 음역 모호성 처리 JY Park 저술 2018-TTS(Text-to-Speech)는 문자 텍스트가 입력되었을 때,. 이를 자동으로 음성 변환 하여 출력해주는 음성합성 기술. 을 말한다. TTS는 현재 기술의 완성도가 높아짐에 네이버 지식iN https://kin. .naver.com > qna > detail : balabolka (TTS프로그램) 한 : 네이버 지식iN 우리나라 말과 영어가 혼합된 것이라면 듣기가 조금 불편할 수도 있습니다. 영어면 원래 영어로 셋팅하고 한국',
@@ -485,7 +534,7 @@ const Meeting = () => {
     <div className="flex h-full w-full flex-col justify-center bg-black">
       <div
         id="session"
-        className={`h-video-container flex w-full ${
+        className={`flex h-video-container w-full ${
           mainStreamManager
             ? 'flex-row items-center gap-4'
             : 'flex-col overflow-auto'
@@ -505,14 +554,14 @@ const Meeting = () => {
           // className="flex h-full w-full items-center justify-center"
           className={`${
             mainStreamManager
-              ? 'max-h-video-container flex flex-col overflow-auto'
+              ? 'flex max-h-video-container flex-col overflow-auto'
               : subscribers.length === 0
-              ? 'h-video-container px-1/10 grid grid-cols-1 items-center justify-center'
+              ? 'grid h-video-container grid-cols-1 items-center justify-center px-1/10'
               : subscribers.length === 1
-              ? 'h-video-container grid grid-cols-2 items-center justify-center'
+              ? 'grid h-video-container grid-cols-2 items-center justify-center'
               : subscribers.length <= 3
-              ? 'h-video-container px-1/10 grid grid-cols-2 items-center justify-center'
-              : 'h-video-container grid grid-cols-3 items-center justify-center'
+              ? 'grid h-video-container grid-cols-2 items-center justify-center px-1/10'
+              : 'grid h-video-container grid-cols-3 items-center justify-center'
           } gap-4`}
         >
           {publisher && (
@@ -554,13 +603,21 @@ const Meeting = () => {
       {/* Bottom bar */}
       <div className="relative flex h-24 w-full flex-row justify-between p-6">
         <div className="flex gap-4">
-          <Control name="camera" OnClick={handleCameraClick}>
+          <Control
+            name="camera"
+            OnClick={handleCameraClick} // mute or unmute
+            OnMoreClick={handleCameraDeviceClick} // 카메라 기기 선택
+          >
             {isCameraOn ? <CameraOn /> : <CameraOff />}
           </Control>
-          <Control name="mic" OnClick={handleMicClick}>
+          <Control
+            name="mic"
+            OnClick={handleMicClick}
+            OnMoreClick={handleMicDeviceClick} // 카메라 기기 선택
+          >
             {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
           </Control>
-          <Button
+          {/* <Button
             name="speaker"
             onClick={handleOcrClick}
             className="gap-2 px-2"
@@ -576,14 +633,19 @@ const Meeting = () => {
                 <div className="">공유화면 읽기</div>
               </>
             )}
+          </Button> */}
+          <Button onClick={handleCapture} className="px-2">
+            ocr test
           </Button>
-          <Button onClick={handleCapture}>ocr test</Button>
         </div>
         <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
           <Button onClick={publishScreenShare} className="p-2">
             <ScreenShareIcon />
           </Button>
-          <Button onClick={leaveSession} className="bg-secondary p-2">
+          <Button
+            onClick={leaveSession}
+            className="hover:bg-secondary-hover bg-secondary p-2"
+          >
             <ExitIcon />
           </Button>
         </div>

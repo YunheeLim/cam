@@ -13,10 +13,11 @@ module.exports = {
       colors: {
         primary: {
           DEFAULT: '#5856D6',
+          hover: '#6A69E8',
           1: 'rgba(88, 86, 214, 0.05)',
           2: '#7E47EB',
         },
-        secondary: { DEFAULT: '#C74E5B' },
+        secondary: { DEFAULT: '#C74E5B', hover: '#D85F6C' },
       },
       fontFamily: {
         pretendard: ['var(--font-pretendard)', 'sans-serif'],

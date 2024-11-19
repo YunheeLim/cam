@@ -37,7 +37,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
 
     const getNicknameTag = () => {
       if (streamManager.stream.typeOfVideo == 'SCREEN') {
-        console.log(streamManager);
+        // console.log(streamManager);
         const jsonString = streamManager?.stream?.session?.options?.metadata;
         const parsedData = JSON.parse(jsonString);
         const owner = parsedData.clientData;
