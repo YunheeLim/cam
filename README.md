@@ -103,11 +103,9 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
       └📜signaling.js
       └📜tailwind.config.js
       └ ...
-
-
 ```
 
-## 화면 구성
+## 주요 기능
 
 **[메인 페이지]**
 
@@ -146,4 +144,4 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
  <img src="./public/images/image-6.png" width="49%" align="center"/></p>
 
 - 화면 공유: 화면을 공유할 수 있다.
-- 공유 화면 읽기: 해당 버튼을 클릭하면 공유된 화면의 텍스트를 음성으로 읽어준다.
+- 공유 화면 읽기: 해당 버튼을 클릭 또는 단축키(ctrl+o) 입력 시 공유된 화면의 텍스트를 음성으로 읽어준다.

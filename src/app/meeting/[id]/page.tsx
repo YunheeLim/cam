@@ -695,7 +695,7 @@ const Meeting = () => {
           </Button>
           <Button
             onClick={leaveSession}
-            className="hover:bg-secondary-hover bg-secondary p-2"
+            className="bg-secondary p-2 hover:bg-secondary-hover"
           >
             <ExitIcon />
           </Button>

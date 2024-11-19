@@ -20,6 +20,8 @@ const DATA = {
 const Preview = () => {
   const router = useRouter();
   const params = useParams();
+  window.sessionStorage.removeItem('firstLoadDone');
+
   // const {
   //   videoRef,
   //   stream,
