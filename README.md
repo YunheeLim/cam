@@ -96,7 +96,7 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
       └📜next.config.mjs
       └📜package-lock.json
       └📜package.json
-      └📜server.js
+      └📜signaling.js
       └📜tailwind.config.js
       └ ...
 
@@ -111,7 +111,11 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
   <img src="./public/images/image.png" width="49%" align="center"/>
   <img src="./public/images/image-1.png" width="49%" align="center"/>
 </p>
-![alt text](image-6.png)
+
+- 단축키 설정: 마우스 조작이 어려울 경우 단축키를 사용할 수 있다.
+- 회의 생성: 새 회의를 생성한다.
+- 회의 참가: 기 생성된 회의의 ID를 입력하여 참가한다.
+
 **[미리보기 페이지]**
 
 <p align="center">
@@ -119,5 +123,23 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
   <img src="./public/images/image-2.png" width="49%" align="center"/>
 </p>
 
+- 카메라/마이크 권한 설정: 권한을 허용해야 회의에 참여할 수 있다.
+- 카메라/마이크 설정: 카메라와 마이크 상태를 확인할 수 있다.
+- 이름 변경: 회의에 참여할 이름을 설정할 수 있다.
+
 **[회의 페이지]**
-![alt text](image-3.png)
+
+<p align="left">
+  <img src="./public/images/image-4.png" width="49%" align="center"/>
+</p>
+
+- 회의: 다수의 참여자끼리 화상 회의를 할 수 있다.
+- 카메라/마이크 on/off: 카메라와 마이크를 끄고 킬 수 있다.
+- 회의 나가기: 회의에서 나갈 수 있다.
+
+<p align="center">
+  <img src="./public/images/image-5.png" width="49%" align="center"/>
+ <img src="./public/images/image-6.png" width="49%" align="center"/></p>
+
+- 화면 공유: 화면을 공유할 수 있다.
+- 공유 화면 읽기: 해당 버튼을 클릭하면 공유된 화면의 텍스트를 음성으로 읽어준다.

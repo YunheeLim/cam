@@ -15,7 +15,9 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
     const [audioActive, setAudioActive] = useState(
       streamManager.stream.audioActive,
     );
+    const [bgColor, setBgColor] = useState('');
 
+    // 비디오/오디오 활성화 여부
     useEffect(() => {
       const handleStreamPropertyChanged = (event: any) => {
         if (event.changedProperty === 'videoActive') {
@@ -35,6 +37,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
       };
     }, [streamManager]);
 
+    // 네임태그
     const getNicknameTag = () => {
       if (streamManager.stream.typeOfVideo == 'SCREEN') {
         // console.log(streamManager);
@@ -48,6 +51,19 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
       }
     };
 
+    // 비디오 비활성화 시 이름 색 랜덤
+    useEffect(() => {
+      const getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+      setBgColor(getRandomColor());
+    }, []);
+
     return (
       <div className="flex h-full w-full flex-col">
         {streamManager ? (
@@ -56,8 +72,12 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
             <div className="absolute bottom-2 left-2 flex items-center justify-center rounded-md bg-[rgba(6,7,9,0.7)] px-2 py-1 text-sm text-white">
               {getNicknameTag()}
             </div>
+            {/* 비디오 off */}
             {!videoActive && (
-              <div className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-primary-2 text-4xl font-semibold text-white">
+              <div
+                style={{ backgroundColor: bgColor }}
+                className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full text-4xl font-semibold text-white"
+              >
                 {/* 입력한 닉네임이 공백일 때 기본 이름으로 설정 */}
                 {getNicknameTag()[0]}
               </div>
