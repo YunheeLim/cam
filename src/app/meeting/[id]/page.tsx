@@ -25,6 +25,8 @@ import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
 import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
+import { useHotkeys } from 'react-hotkeys-hook';
+
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -164,12 +166,14 @@ const Meeting = () => {
     );
   };
 
+  // 쿼리로 미팅ID 가져오기
   useEffect(() => {
-    if (params.id) {
-      console.log(params.id);
+    if (params?.id) {
+      setMySessionId(`${params?.id}`);
     }
   }, [params]);
 
+  // 쿼리로 닉네임 가져오기
   useEffect(() => {
     if (searchParams) {
       const nickName = searchParams.get('nickName');
@@ -179,6 +183,8 @@ const Meeting = () => {
       }
     }
   }, [searchParams]);
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (isNickNameSet) {
@@ -512,6 +518,7 @@ const Meeting = () => {
     };
   }, [text]);
 
+  // 공유 화면 캡쳐
   const handleCapture = async () => {
     if (mainStreamManager) {
       const textData = await getText(mainStreamManager);
@@ -522,6 +529,9 @@ const Meeting = () => {
       console.log('text in handlecapture', textData);
     }
   };
+
+  // 화면 캡쳐 및 ocr 단축키
+  useHotkeys('ctrl+o', handleCapture);
 
   // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {

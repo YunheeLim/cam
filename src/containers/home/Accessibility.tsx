@@ -4,10 +4,16 @@ import ScreenIcon from '../../../public/svgs/screen.svg';
 import KeyboardIcon from '../../../public/svgs/keyboard.svg';
 
 interface Accessibility {
+  isToggled: boolean;
+  onClick: () => void;
   children: string;
 }
 
-const Accessibility: React.FC<Accessibility> = ({ children }) => {
+const Accessibility: React.FC<Accessibility> = ({
+  isToggled,
+  onClick,
+  children,
+}) => {
   return (
     <div className="mb-6 flex w-full flex-row justify-between px-1">
       <div className="flex">
@@ -19,7 +25,7 @@ const Accessibility: React.FC<Accessibility> = ({ children }) => {
         <div className="px-2 text-xl font-semibold">{children}</div>
       </div>
       <div>
-        <ToggleButton></ToggleButton>
+        <ToggleButton isToggled={isToggled} onClick={onClick}></ToggleButton>
       </div>
     </div>
   );

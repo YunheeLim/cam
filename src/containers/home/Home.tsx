@@ -6,6 +6,7 @@ import Accessibility from './Accessibility';
 import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const Home = () => {
   const router = useRouter();
@@ -14,12 +15,21 @@ const Home = () => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isKeyboard, setIsKeyBoard] = useState(false);
 
   const handleCreateMeeting = async () => {
     // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자
     const createdId =
       currentTime.getTime() + Math.floor(Math.random() * 100000);
-    router.push(`preview/${createdId}`);
+    router.push(`preview/${createdId}?type=new`);
+  };
+
+  // 단축키 설정
+  const handleKeyboard = () => {
+    setIsKeyBoard(prev => {
+      window.sessionStorage.setItem('shortcut', JSON.stringify(!prev));
+      return !prev;
+    });
   };
 
   const handleOpenModal = () => {
@@ -61,7 +71,10 @@ const Home = () => {
   const formattedTime = `${formattedHours} : ${formattedMinutes} ${ampm}`;
 
   return (
-    <div className="flex h-full w-full flex-row items-center justify-center">
+    <div
+      id="container"
+      className="flex h-full w-full flex-row items-center justify-center"
+    >
       {/* Wrapper */}
       <div className="flex w-11/12 flex-col items-center justify-center rounded-3xl bg-primary-1 px-6 py-16 text-primary sm:px-0 md:w-[700px]">
         <div className="text-5xl font-semibold">{formattedTime}</div>
@@ -73,8 +86,10 @@ const Home = () => {
         {/* 수평선 */}
         <div className="my-10 h-px w-4/6 bg-primary"></div>
         <div className="flex w-full flex-col items-center sm:w-[416px]">
-          <Accessibility>스크린 리더</Accessibility>
-          <Accessibility>단축키</Accessibility>
+          {/* <Accessibility>스크린 리더</Accessibility> */}
+          <Accessibility isToggled={isKeyboard} onClick={handleKeyboard}>
+            단축키
+          </Accessibility>
           <Button className="mt-3 w-full">저장</Button>
         </div>
       </div>

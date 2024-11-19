@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 
-const ToggleButton = () => {
-  const [isToggled, setIsToggled] = useState(false);
+interface ToggleButtonType {
+  isToggled: boolean;
+  onClick: () => void;
+}
+const ToggleButton: React.FC<ToggleButtonType> = ({ isToggled, onClick }) => {
+  // const [isToggled, setIsToggled] = useState(false);
 
-  const toggleButton = () => {
-    setIsToggled(!isToggled);
-  };
+  // const toggleButton = () => {
+  //   setIsToggled(!isToggled);
+  // };
 
   return (
     <button
-      onClick={toggleButton}
+      onClick={onClick}
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
         isToggled ? 'bg-primary' : 'bg-gray-300'
       }`}
