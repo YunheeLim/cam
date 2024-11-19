@@ -22,23 +22,27 @@
 
 ## 아키텍처
 
-![alt text](image-4.png)
+<img src="./public/images/image-7.png" />
 
 ## 실행 방법
 
 ```bash
-# 미디어 중개 서버
+# 미디어 중개 서버 실행
 $ docker run -p 4443:4443 --rm -e OPENVIDU_SECRET=MY_SECRET openvidu/openvidu-dev:2.30.0
 ```
 
 ```bash
-# Signaling 서버
+# 필요 패키지 설치
+$ npm i
+```
+
+```bash
+# Signaling 서버 실행
 $ node signaling.js
 ```
 
 ```bash
-# client
-$ npm i
+# client 실행
 $ npm run dev
 ```
 
