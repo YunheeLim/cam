@@ -27,10 +27,6 @@ import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRouterRefresh } from '@/hooks/useRouterRefresh';
-import { useBeforeUnload } from 'react-use';
-import Router from 'next/router';
-
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
@@ -78,7 +74,6 @@ const Meeting = () => {
   const [text, setText] = useState(''); // ocr 텍스트
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
   const [isReading, setIsReading] = useState(false); // ocr 텍스트 리딩 상태
-  const refresh = useRouterRefresh(); // 새로고침 감지
 
   // 단축키 설정 정보
   useEffect(() => {

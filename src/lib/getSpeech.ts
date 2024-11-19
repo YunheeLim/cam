@@ -7,10 +7,13 @@ const langMap: { [key: string]: string } = {
   // 필요한 언어 추가 가능
 };
 
-// 언어 자동 감지하여 한 언어만 지원
+// 한 언어만 지원
 export const getSpeechForOne = (text: string) => {
-  const detectedLangCode = franc(text, { minLength: 3 });
-  const lang = langMap[detectedLangCode] || 'ko-KR'; // 한국어 디폴트
+  // 언어 자동 감지하여 설정
+  // const detectedLangCode = franc(text, { minLength: 3 });
+  // const lang = langMap[detectedLangCode] || 'ko-KR'; // 한국어 디폴트
+
+  const lang = 'ko-KR'; // 한국어 디폴트
 
   const utterThis = new SpeechSynthesisUtterance(text);
   utterThis.lang = lang;
