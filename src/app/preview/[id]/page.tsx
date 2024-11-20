@@ -12,6 +12,7 @@ import MicOff from '../../../../public/svgs/mic_off.svg';
 import SettingIcon from '../../../../public/svgs/setting.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const DATA = {
   user_name: '홍길동',
@@ -21,6 +22,14 @@ const Preview = () => {
   const router = useRouter();
   const params = useParams();
   window.sessionStorage.removeItem('firstLoadDone');
+  const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
+
+  // 단축키 설정 정보
+  useEffect(() => {
+    if (window.sessionStorage.getItem('shortcut') === 'true') {
+      setIsShortcut(true);
+    }
+  }, [window.sessionStorage.getItem('shortcut')]);
 
   // const {
   //   videoRef,
@@ -79,6 +88,17 @@ const Preview = () => {
       `/meeting/${sessionId}?nickName=${nickName ? nickName : DATA.user_name}`,
     );
   };
+
+  useHotkeys(
+    'enter',
+    handleJoinClick,
+    {
+      enabled: isShortcut,
+    },
+    [isShortcut], // Dependency array if the condition changes
+  );
+
+  useHotkeys('left', () => router.back(), { enabled: isShortcut });
 
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);

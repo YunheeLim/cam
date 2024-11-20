@@ -23,6 +23,7 @@ const Home = () => {
       currentTime.getTime() + Math.floor(Math.random() * 100000);
     router.push(`preview/${createdId}?type=new`);
   };
+  useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard });
 
   // 단축키 설정
   const handleKeyboard = () => {
@@ -35,6 +36,8 @@ const Home = () => {
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
+
+  useHotkeys('2', handleOpenModal, { enabled: isKeyboard });
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

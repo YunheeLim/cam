@@ -261,13 +261,14 @@ const Meeting = () => {
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
         audioSource: `${
           myUserName === '홍길동'
-            ? '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
-            : 'da286a7707355b39637e3699f4dcdecee7ea2794cfdabf1ed6f73b7fd6b2cfee'
+            ? '3052a7363995d0911d79fc27fd495c185c4964c6985b9ef272fc6c9a87e24a10'
+            : '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
         }`,
+
         videoSource: `${
           myUserName === '홍길동'
-            ? '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
-            : '2d6d38260a11a90ac2a0ec702e8e4a4c40910063f4eb3da8ade0454f599b2e54'
+            ? '2d0e68cd4af4f5e23b0c993490d2da1d954df4b63182f0e09cefa4d4bc7ca021'
+            : '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
         }`,
         publishAudio: true,
         publishVideo: true,
@@ -306,28 +307,30 @@ const Meeting = () => {
   };
 
   // 비디오/오디오 기기 목록
-  useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const devices = await OV.current?.getDevices();
-        if (devices) {
-          const videoDevices = devices.filter(
-            device => device.kind === 'videoinput',
-          );
-          setVideoDeviceList(videoDevices);
+  // useEffect(() => {
+  //   const fetchDevices = async () => {
+  //     try {
+  //       const devices = await OV.current?.getDevices();
+  //       if (devices) {
+  //         const videoDevices = devices.filter(
+  //           device => device.kind === 'videoinput',
+  //         );
+  //         console.log(videoDevices);
+  //         setVideoDeviceList(videoDevices);
 
-          const audioDevices = devices.filter(
-            device => device.kind === 'audioinput',
-          );
-          setAudioDeviceList(audioDevices);
-        }
-      } catch (error) {
-        console.error('Error fetching devices:', error);
-      }
-    };
+  //         const audioDevices = devices.filter(
+  //           device => device.kind === 'audioinput',
+  //         );
+  //         console.log(audioDevices);
+  //         setAudioDeviceList(audioDevices);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching devices:', error);
+  //     }
+  //   };
 
-    fetchDevices();
-  }, [joinSession]);
+  //   fetchDevices();
+  // }, [joinSession]);
 
   const publishScreenShare = async () => {
     OVScreen.current = new OpenVidu();
@@ -566,6 +569,9 @@ const Meeting = () => {
 
   // 화면 캡쳐 및 ocr 단축키
   useHotkeys('ctrl+o', handleCapture, { enabled: isShortcut });
+
+  // 회의 나가기
+  useHotkeys('esc', leaveSession, { enabled: isShortcut });
 
   // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {

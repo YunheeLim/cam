@@ -44,7 +44,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
         const jsonString = streamManager?.stream?.session?.options?.metadata;
         const parsedData = JSON.parse(jsonString);
         const owner = parsedData.clientData;
-        return `${owner}의 화면`;
+        return `공유 화면`;
       } else {
         // Gets the nickName of the user
         return JSON.parse(streamManager.stream.connection.data).clientData;

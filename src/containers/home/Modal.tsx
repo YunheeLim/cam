@@ -4,7 +4,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import CloseIcon from '../../../public/svgs/close.svg';
 import Input from '@/components/Input';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,6 +28,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleJoinClick = () => {
+    router.push(`/preview/${text}?type=exist`);
+  };
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-5"
@@ -42,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <div className="mt-5 flex flex-grow flex-col items-center justify-between gap-5">
           <Input onChange={handleChange} placeholder="회의 ID 또는 링크" />
           <button
-            onClick={() => router.push(`/preview/${text}?type=exist`)}
+            onClick={handleJoinClick}
             className="w-full rounded-lg bg-primary py-3 font-semibold text-white"
           >
             참가
