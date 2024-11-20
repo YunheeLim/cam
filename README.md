@@ -3,6 +3,9 @@
 ## 프로젝트 소개
 
 시각 장애인의 웹 접근성을 위한 온라인 화상회의 플랫폼<br/>
+
+<img src="./public/images/image-8.png" />
+
 [데모 영상](https://www.youtube.com/watch?v=Zh_atcEjZe4)
 
 ## 프로젝트 배경
@@ -11,9 +14,17 @@
 
 ## 적용 기술
 
-- WebRTC
-- TTS (Text-To-Speech)
-- OCR (Optical Character Recognition)
+1. **WebRTC**
+
+- 브라우저 간 플러그인 없이 오디오, 비디오, 데이터 스트리밍을 실시간으로 지원하는 기술
+
+2. **TTS (Text-To-Speech)**
+
+- 텍스트를 음성으로 변환하는 기술
+
+3. **OCR (Optical Character Recognition)**
+
+- 이미지나 스캔된 문서에서 텍스트를 인식하고 디지털 데이터로 변환하는 기술
 
 ## 개발 환경
 
@@ -115,9 +126,9 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
   <img src="./public/images/image-1.png" width="49%" align="center"/>
 </p>
 
-- 단축키 설정: 마우스 조작이 어려울 경우 단축키를 사용할 수 있다<br/>(다음 페이지: enter, 이전 페이지: delete).
-- 회의 생성: 새 회의를 생성한다.
-- 회의 참가: 기 생성된 회의의 ID를 입력하여 참가한다.
+- 단축키 설정: 마우스 조작이 어려울 경우 단축키를 사용할 수 있다<br/>
+- 회의 생성: 새 회의를 생성한다. (단축키: 1)
+- 회의 참가: 기 생성된 회의의 ID를 입력하여 참가한다. (단축키: 2)
 
 **[미리보기 페이지]**
 
@@ -129,6 +140,8 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
 - 카메라/마이크 권한 설정: 권한을 허용해야 회의에 참여할 수 있다.
 - 카메라/마이크 설정: 카메라와 마이크 상태를 확인할 수 있다.
 - 이름 변경: 회의에 참여할 이름을 설정할 수 있다.
+- 참가: 회의에 참여한다. (단축키: enter)
+- (뒤로가기: 왼쪽 화살표)
 
 **[회의 페이지]**
 
@@ -138,11 +151,11 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
 
 - 회의: 다수의 참여자끼리 화상 회의를 할 수 있다.
 - 카메라/마이크 on/off: 카메라와 마이크를 끄고 킬 수 있다.
-- 회의 나가기: 회의에서 나갈 수 있다.
+- 회의 나가기: 회의에서 나갈 수 있다. (단축키: esc)
 
 <p align="center">
   <img src="./public/images/image-5.png" width="49%" align="center"/>
  <img src="./public/images/image-6.png" width="49%" align="center"/></p>
 
 - 화면 공유: 화면을 공유할 수 있다.
-- 공유 화면 읽기: 해당 버튼을 클릭 또는 단축키(ctrl+o) 입력 시 공유된 화면의 텍스트를 음성으로 읽어준다.
+- 공유 화면 읽기: 해당 버튼을 클릭 시 공유된 화면의 텍스트를 음성으로 읽어준다. (단축키: ctrl+o)
