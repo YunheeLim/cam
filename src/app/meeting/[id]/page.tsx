@@ -682,7 +682,7 @@ const Meeting = () => {
             onClick={handleCapture}
             disabled={!mainStreamManager} // 버튼 비활성화
             className={`gap-2 px-4 ${
-              mainStreamManager ? '' : 'text-gray-400 hover:bg-primary'
+              mainStreamManager ? '' : '!text-gray-400 hover:!bg-primary'
             }`}
           >
             <RiSpeakLine size={32} />
