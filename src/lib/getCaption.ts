@@ -9,15 +9,26 @@ const getCaption = async (image: string) => {
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: 'You are a helpful assistant.' },
       {
         role: 'user',
-        content: 'Write a haiku about recursion in programming.',
+        content: [
+          {
+            type: 'text',
+            text: 'You are an AI that analyzes images. If the image contains any visual elements such as objects, people, or scenery, provide a detailed description of the image content in Korean. However, if the image contains only text with no other visual elements, respond with "Failed".',
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: image,
+            },
+          },
+        ],
       },
     ],
   });
 
-  console.log(completion.choices[0].message);
+  console.log('image caption in getCaption:', completion.choices[0].message);
+  return completion.choices[0].message;
 };
 
 export default getCaption;

@@ -19,9 +19,9 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isKeyboard, setIsKeyBoard] = useState(false);
 
-  useEffect(() => {
-    getCaption();
-  }, []);
+  // useEffect(() => {
+  //   getCaption();
+  // }, []);
 
   const handleCreateMeeting = async () => {
     // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자

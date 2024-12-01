@@ -2,7 +2,8 @@ import blobToBase64 from './blobToBase64';
 import { StreamManager } from 'openvidu-browser';
 import getOcrText from './getOcr';
 import { useState, useEffect } from 'react';
-import getCaption from './getSKCaption';
+// import getCaption from './getSKCaption';
+import getCaption from './getCaption';
 import resizeImageBlob from './resizeImageBlob';
 
 interface fieldType {
@@ -34,6 +35,8 @@ interface itemType {
 }
 
 const getText = async (mainStreamManager: StreamManager) => {
+  let returnText = '';
+
   if (mainStreamManager?.stream) {
     const videoTrack = mainStreamManager?.stream
       ?.getMediaStream()
@@ -70,24 +73,28 @@ const getText = async (mainStreamManager: StreamManager) => {
 
           // caption api
           try {
-            const captionResult = await getCaption(base64String);
-            console.log('formatted Caption Result:', captionResult);
-            return captionResult;
+            const captionResult = await getCaption(base64Data);
+            const formattedCaption = captionResult?.content;
+            console.log('formatted Caption Result:', formattedCaption);
+
+            if (formattedCaption !== 'Failed') {
+              returnText += formattedCaption;
+            }
           } catch (error) {
             console.error('Failed to get Caption Text', error);
           }
 
           // ocr api
-          // try {
-          //   const ocrResult = await getOcrText(base64String);
-          //   const extractedText = ocrResult.images[0].fields
-          //     .map((item: fieldType) => item.inferText)
-          //     .join(' ');
-          //   console.log('formatted OCR Result:', extractedText);
-          //   return extractedText;
-          // } catch (error) {
-          //   console.error('Failed to get OCR text:', error);
-          // }
+          try {
+            const ocrResult = await getOcrText(base64String);
+            const extractedText = ocrResult.images[0].fields
+              .map((item: fieldType) => item.inferText)
+              .join(' ');
+            console.log('formatted OCR Result:', extractedText);
+            return returnText + extractedText;
+          } catch (error) {
+            console.error('Failed to get OCR text:', error);
+          }
         } else {
           console.error('Failed to create Blob from canvas');
         }

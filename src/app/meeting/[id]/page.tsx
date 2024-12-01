@@ -27,6 +27,7 @@ import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
+
 declare global {
   interface ImageCapture {
     new (videoTrack: MediaStreamTrack): ImageCapture;
