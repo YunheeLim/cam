@@ -10,6 +10,10 @@ interface VideoContextProps {
   setIsCameraOn: React.Dispatch<React.SetStateAction<boolean>>;
   isMicOn: boolean;
   setIsMicOn: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedVideoDeviceId: string;
+  setSelectedVideoDeviceId: React.Dispatch<React.SetStateAction<string>>;
+  selectedAudioDeviceId: string;
+  setSelectedAudioDeviceId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const VideoContext = createContext<VideoContextProps | undefined>(undefined);
@@ -21,6 +25,10 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
+  const [selectedVideoDeviceId, setSelectedVideoDeviceId] =
+    useState<string>('');
+  const [selectedAudioDeviceId, setSelectedAudioDeviceId] =
+    useState<string>('');
 
   return (
     <VideoContext.Provider
@@ -32,6 +40,10 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsCameraOn,
         isMicOn,
         setIsMicOn,
+        selectedVideoDeviceId,
+        setSelectedVideoDeviceId,
+        selectedAudioDeviceId,
+        setSelectedAudioDeviceId,
       }}
     >
       {children}

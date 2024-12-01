@@ -34,25 +34,19 @@ const Preview = () => {
     }
   }, []);
 
-  // const {
-  //   videoRef,
-  //   stream,
-  //   setStream,
-  //   isCameraOn,
-  //   setIsCameraOn,
-  //   isMicOn,
-  //   setIsMicOn,
-  // } = useVideo();
+  const {
+    isCameraOn,
+    setIsCameraOn,
+    isMicOn,
+    setIsMicOn,
+    selectedVideoDeviceId,
+    setSelectedVideoDeviceId,
+    selectedAudioDeviceId,
+    setSelectedAudioDeviceId,
+  } = useVideo();
 
-  const [isCameraOn, setIsCameraOn] = useState(true);
-  const [isMicOn, setIsMicOn] = useState(true);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedVideoDeviceId, setSelectedVideoDeviceId] =
-    useState<string>('');
-  const [selectedAudioDeviceId, setSelectedAudioDeviceId] =
-    useState<string>('');
-  // 새 스트림 생성을 위한 기기 변경 감지
   const [prevVideoDeviceId, setPrevVideoDeviceId] = useState<string>('');
   const [prevAudioDeviceId, setPrevAudioDeviceId] = useState<string>('');
   const [isNewStream, setIsNewStream] = useState(false); // 기기 변경으로 인한 새 스트림 생성 여부

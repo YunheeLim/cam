@@ -61,7 +61,7 @@ const Meeting = () => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const [isOcrOn, setIsOcrOn] = useState(false); // TODO: API로 호출
+  const [isOcrOn, setIsOcrOn] = useState(false);
   const [numParticipants, setNumParticipants] = useState(0);
 
   const { videoRef, stream, isCameraOn, setIsCameraOn, isMicOn, setIsMicOn } =
