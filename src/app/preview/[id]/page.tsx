@@ -52,6 +52,10 @@ const Preview = () => {
     useState<string>('');
   const [selectedAudioDeviceId, setSelectedAudioDeviceId] =
     useState<string>('');
+  // 새 스트림 생성을 위한 기기 변경 감지
+  const [prevVideoDeviceId, setPrevVideoDeviceId] = useState<string>('');
+  const [prevAudioDeviceId, setPrevAudioDeviceId] = useState<string>('');
+  const [isNewStream, setIsNewStream] = useState(false); // 기기 변경으로 인한 새 스트림 생성 여부
   const [isVideoListOpen, setIsVideoListOpen] = useState(false);
   const [isAudioListOpen, setIsAudioListOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | string[]>('');
@@ -75,21 +79,45 @@ const Preview = () => {
 
   // 첫 렌더링 시 비디오/오디오 기기 가져온 후 첫 기기로 설정
   useEffect(() => {
-    if (videoDevices.length) {
+    if (!selectedVideoDeviceId && videoDevices.length) {
       setSelectedVideoDeviceId(videoDevices[0].deviceId);
+      setPrevVideoDeviceId(videoDevices[0].deviceId);
     }
-    if (audioDevices.length) {
+    if (!selectedVideoDeviceId && audioDevices.length) {
       setSelectedAudioDeviceId(audioDevices[0].deviceId);
+      setPrevAudioDeviceId(audioDevices[0].deviceId);
     }
   }, [videoDevices, audioDevices]);
+
+  // 기기 변경 시 새 스트림 생성
+  useEffect(() => {
+    if (isNewStream) {
+      getMedia();
+    }
+  }, [isNewStream]);
 
   // 스트림 생성
   const getMedia = async () => {
     try {
+      // 새 스트림 요청
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: isMicOn,
-        video: isCameraOn,
+        audio: {
+          deviceId: selectedAudioDeviceId
+            ? { exact: selectedAudioDeviceId }
+            : undefined,
+        },
+        video: {
+          deviceId: selectedVideoDeviceId
+            ? { exact: selectedVideoDeviceId }
+            : undefined,
+        },
       });
+
+      // 기존 스트림 정리
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      setIsNewStream(false);
 
       setStream(mediaStream);
 
@@ -305,8 +333,11 @@ const Preview = () => {
                 <DeviceModal
                   list={videoDevices}
                   selectedDeviceId={selectedVideoDeviceId}
+                  prevDeviceId={prevVideoDeviceId}
+                  onSetPrevDeviceId={setPrevVideoDeviceId}
                   onSetSelectedDeviceId={setSelectedVideoDeviceId}
-                  onClose={() => setIsVideoListOpen(prev => !prev)}
+                  onSetIsNewStream={setIsNewStream}
+                  onClose={() => setIsVideoListOpen(false)}
                 />
               )}
             </div>
@@ -323,8 +354,11 @@ const Preview = () => {
                 <DeviceModal
                   list={audioDevices}
                   selectedDeviceId={selectedAudioDeviceId}
+                  prevDeviceId={prevAudioDeviceId}
+                  onSetPrevDeviceId={setPrevAudioDeviceId}
                   onSetSelectedDeviceId={setSelectedAudioDeviceId}
-                  onClose={() => setIsAudioListOpen(prev => !prev)}
+                  onSetIsNewStream={setIsNewStream}
+                  onClose={() => setIsAudioListOpen(false)}
                 />
               )}
             </div>

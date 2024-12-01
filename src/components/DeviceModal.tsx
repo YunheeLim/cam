@@ -4,7 +4,10 @@ import { FaCheck } from 'react-icons/fa6';
 interface DeviceModalProps {
   list: MediaDeviceInfo[];
   selectedDeviceId: string;
+  prevDeviceId: string;
   onSetSelectedDeviceId: React.Dispatch<React.SetStateAction<string>>;
+  onSetPrevDeviceId: React.Dispatch<React.SetStateAction<string>>;
+  onSetIsNewStream: React.Dispatch<React.SetStateAction<boolean>>;
   onClose: () => void;
 }
 
@@ -18,11 +21,18 @@ interface ItemProps {
 const DeviceModal: React.FC<DeviceModalProps> = ({
   list,
   selectedDeviceId,
+  prevDeviceId,
   onSetSelectedDeviceId,
+  onSetPrevDeviceId,
+  onSetIsNewStream,
   onClose,
 }) => {
   const handleSelect = (deviceId: string) => {
-    onSetSelectedDeviceId(deviceId);
+    if (deviceId !== prevDeviceId) {
+      onSetSelectedDeviceId(deviceId);
+      onSetPrevDeviceId(deviceId);
+      onSetIsNewStream(true);
+    }
     onClose();
   };
 
