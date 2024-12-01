@@ -6,7 +6,6 @@ import CloseIcon from '../../../public/svgs/close.svg';
 import Input from '@/components/Input';
 import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { warn } from 'console';
 
 interface ModalProps {
   onClose: () => void;

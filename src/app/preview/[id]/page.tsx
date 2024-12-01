@@ -13,6 +13,7 @@ import SettingIcon from '../../../../public/svgs/setting.svg';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { useHotkeys } from 'react-hotkeys-hook';
+import DeviceModal from '@/components/DeviceModal';
 
 const DATA = {
   user_name: '홍길동',
@@ -24,7 +25,7 @@ const Preview = () => {
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
 
   useEffect(() => {
-    // 회의실 새로고침
+    // 회의실 새로고침 관련
     window.sessionStorage.removeItem('firstLoadDone');
 
     // 단축키 설정 정보
@@ -45,6 +46,14 @@ const Preview = () => {
 
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedVideoDeviceId, setSelectedVideoDeviceId] =
+    useState<string>('');
+  const [selectedAudioDeviceId, setSelectedAudioDeviceId] =
+    useState<string>('');
+  const [isVideoListOpen, setIsVideoListOpen] = useState(false);
+  const [isAudioListOpen, setIsAudioListOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | string[]>('');
   const [nickName, setNickName] = useState<string>(DATA.user_name);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -56,12 +65,25 @@ const Preview = () => {
     getMedia();
   }, [params]);
 
+  // 스트림 생성되면 기기 목록 가져오기
   useEffect(() => {
     if (stream) {
       console.log(stream);
+      getDevices();
     }
   }, [stream]);
 
+  // 첫 렌더링 시 비디오/오디오 기기 가져온 후 첫 기기로 설정
+  useEffect(() => {
+    if (videoDevices.length) {
+      setSelectedVideoDeviceId(videoDevices[0].deviceId);
+    }
+    if (audioDevices.length) {
+      setSelectedAudioDeviceId(audioDevices[0].deviceId);
+    }
+  }, [videoDevices, audioDevices]);
+
+  // 스트림 생성
   const getMedia = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -85,16 +107,60 @@ const Preview = () => {
     }
   };
 
+  // 장치 목록 가져오기
+  const getDevices = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        device => device.kind === 'videoinput',
+      );
+      const audioDevices = devices.filter(
+        device => device.kind === 'audioinput',
+      );
+
+      console.log('Video Devices:', videoDevices);
+      console.log('Audio Devices:', audioDevices);
+
+      setVideoDevices(videoDevices);
+      setAudioDevices(audioDevices);
+    } catch (error) {
+      console.error('Error accessing devices:', error);
+    }
+  };
+
+  // 카메라 토글
   const handleCameraClick = () => {
     setIsCameraOn(prevState => !prevState);
     stream?.getVideoTracks().forEach(track => (track.enabled = !track.enabled));
   };
 
+  // 마이크 토글
   const handleMicClick = () => {
     setIsMicOn(prevState => !prevState);
     stream?.getAudioTracks().forEach(track => (track.enabled = !track.enabled));
   };
 
+  // 비디오 기기 리스트 모달
+  const handleVideoListClick = () => {
+    setIsAudioListOpen(false);
+    setIsVideoListOpen(prev => !prev);
+  };
+
+  // 오디오 기기 리스트 모달
+  const handleAudioListClick = () => {
+    setIsVideoListOpen(false);
+    setIsAudioListOpen(prev => !prev);
+  };
+
+  // 모달창 외부 클릭 시 모달 닫힘
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsVideoListOpen(false);
+      setIsAudioListOpen(false);
+    }
+  };
+
+  // 닉네임 설정
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNickName(e.target.value);
   };
@@ -105,14 +171,9 @@ const Preview = () => {
     );
   };
 
-  useHotkeys(
-    'enter',
-    handleJoinClick,
-    {
-      enabled: isShortcut,
-    },
-    [isShortcut], // Dependency array if the condition changes
-  );
+  useHotkeys('enter', handleJoinClick, {
+    enabled: isShortcut,
+  });
 
   useHotkeys('left', () => router.back(), { enabled: isShortcut });
 
@@ -204,7 +265,10 @@ const Preview = () => {
   // }, [stream]);
 
   return (
-    <div className="relative flex w-full flex-col items-center px-6">
+    <div
+      onClick={handleBackgroundClick}
+      className="relative flex w-full flex-col items-center px-6"
+    >
       <div className="absolute top-1/20 flex w-full max-w-515 flex-col items-center">
         <h1 className="text-4xl font-bold text-primary">미리 보기</h1>
         <p className="mb-10 mt-2 text-primary">비디오와 오디오를 설정하세요</p>
@@ -224,14 +288,46 @@ const Preview = () => {
           style={{ display: 'none' }}
         ></canvas>
 
-        <div className="my-6 flex w-full flex-row justify-between">
-          <div className="flex gap-4">
-            <Control name={'camera'} OnClick={handleCameraClick}>
-              {isCameraOn ? <CameraOn /> : <CameraOff />}
-            </Control>
-            <Control name={'mic'} OnClick={handleMicClick}>
-              {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
-            </Control>
+        <div
+          className="my-6 flex w-full flex-row justify-between"
+          onClick={handleBackgroundClick}
+        >
+          <div className="flex gap-4" onClick={handleBackgroundClick}>
+            <div className="relative" onClick={handleBackgroundClick}>
+              <Control
+                name={'camera'}
+                OnClick={handleCameraClick}
+                OnMoreClick={handleVideoListClick}
+              >
+                {isCameraOn ? <CameraOn /> : <CameraOff />}
+              </Control>
+              {isVideoListOpen && (
+                <DeviceModal
+                  list={videoDevices}
+                  selectedDeviceId={selectedVideoDeviceId}
+                  onSetSelectedDeviceId={setSelectedVideoDeviceId}
+                  onClose={() => setIsVideoListOpen(prev => !prev)}
+                />
+              )}
+            </div>
+
+            <div className="relative" onClick={handleBackgroundClick}>
+              <Control
+                name={'mic'}
+                OnClick={handleMicClick}
+                OnMoreClick={handleAudioListClick}
+              >
+                {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
+              </Control>
+              {isAudioListOpen && (
+                <DeviceModal
+                  list={audioDevices}
+                  selectedDeviceId={selectedAudioDeviceId}
+                  onSetSelectedDeviceId={setSelectedAudioDeviceId}
+                  onClose={() => setIsAudioListOpen(prev => !prev)}
+                />
+              )}
+            </div>
           </div>
           <button className="flex h-12 w-12 items-center justify-center rounded-lg border border-primary">
             <SettingIcon fill={'#5856D6'} />
