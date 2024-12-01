@@ -19,36 +19,44 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isKeyboard, setIsKeyBoard] = useState(false);
 
-  // useEffect(() => {
-  //   getCaption();
-  // }, []);
+  useEffect(() => {
+    if (localStorage.getItem('shortcut') === 'true') {
+      setIsKeyBoard(true);
+    }
+  }, []);
 
+  // 회의 생성
   const handleCreateMeeting = async () => {
     // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자
     const createdId =
       currentTime.getTime() + Math.floor(Math.random() * 100000);
     router.push(`preview/${createdId}?type=new`);
   };
+
+  // 회의 생성 단축키: 1
   useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard });
 
   // 단축키 설정
   const handleKeyboard = () => {
     setIsKeyBoard(prev => {
-      window.sessionStorage.setItem('shortcut', JSON.stringify(!prev));
+      localStorage.setItem('shortcut', JSON.stringify(!prev));
       return !prev;
     });
   };
 
+  // 회의 참가
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
+  // 회의 참가 단축키: 2
   useHotkeys('2', handleOpenModal, { enabled: isKeyboard });
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  // 시간
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentTime(new Date());
