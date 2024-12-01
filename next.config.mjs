@@ -16,6 +16,10 @@ const nextConfig = {
           'https://5mv4zmu94s.apigw.ntruss.com/custom/v1/34638/138074ec68ed56d430eac26486a538e26fa9b82b8fdc244935f2f7d9fd59f311/general',
         source: '/api/ocrProxy',
       },
+      {
+        destination: 'https://apis.openapi.sk.com/vision/v1/caption',
+        source: '/api/captionProxy',
+      },
     ];
   },
 };

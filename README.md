@@ -126,7 +126,7 @@ NEXT_PUBLIC_OCR_API_KEY='***YOUR KEY***'
   <img src="./public/images/image-1.png" width="49%" align="center"/>
 </p>
 
-- 단축키 설정: 마우스 조작이 어려울 경우 단축키를 사용할 수 있다<br/>
+- 단축키 설정: 마우스 조작이 어려울 경우 단축키를 사용할 수 있다.
 - 회의 생성: 새 회의를 생성한다. (단축키: 1)
 - 회의 참가: 기 생성된 회의의 ID를 입력하여 참가한다. (단축키: 2)
 

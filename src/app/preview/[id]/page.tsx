@@ -54,6 +54,12 @@ const Preview = () => {
     getMedia();
   }, [params]);
 
+  useEffect(() => {
+    if (stream) {
+      console.log(stream);
+    }
+  }, [stream]);
+
   const getMedia = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({

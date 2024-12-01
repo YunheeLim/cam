@@ -259,17 +259,19 @@ const Meeting = () => {
 
       // TODO: 기기 선택
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
-        audioSource: `${
-          myUserName === '홍길동'
-            ? '3052a7363995d0911d79fc27fd495c185c4964c6985b9ef272fc6c9a87e24a10'
-            : '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
-        }`,
+        audioSource: undefined,
+        videoSource: undefined,
+        // audioSource: `${
+        //   myUserName === '홍길동'
+        //     ? '3052a7363995d0911d79fc27fd495c185c4964c6985b9ef272fc6c9a87e24a10'
+        //     : '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
+        // }`,
 
-        videoSource: `${
-          myUserName === '홍길동'
-            ? '2d0e68cd4af4f5e23b0c993490d2da1d954df4b63182f0e09cefa4d4bc7ca021'
-            : '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
-        }`,
+        // videoSource: `${
+        //   myUserName === '홍길동'
+        //     ? '2d0e68cd4af4f5e23b0c993490d2da1d954df4b63182f0e09cefa4d4bc7ca021'
+        //     : '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
+        // }`,
         publishAudio: true,
         publishVideo: true,
         resolution: '640x480',

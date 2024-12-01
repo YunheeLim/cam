@@ -7,6 +7,8 @@ import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
+// import getCaption from '@/lib/getSKCaption';
+import getCaption from '@/lib/getCaption';
 
 const Home = () => {
   const router = useRouter();
@@ -16,6 +18,10 @@ const Home = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isKeyboard, setIsKeyBoard] = useState(false);
+
+  useEffect(() => {
+    getCaption();
+  }, []);
 
   const handleCreateMeeting = async () => {
     // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자

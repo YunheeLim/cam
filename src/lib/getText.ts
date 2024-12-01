@@ -2,6 +2,8 @@ import blobToBase64 from './blobToBase64';
 import { StreamManager } from 'openvidu-browser';
 import getOcrText from './getOcr';
 import { useState, useEffect } from 'react';
+import getCaption from './getSKCaption';
+import resizeImageBlob from './resizeImageBlob';
 
 interface fieldType {
   inferConfidence: number;
@@ -57,6 +59,7 @@ const getText = async (mainStreamManager: StreamManager) => {
           const url = URL.createObjectURL(blob);
           // 생성된 blob 확인
           console.log('blob:', blob);
+          // const new_blob = resizeImageBlob(blob, 100, 100, 0.7);
 
           const base64Data = await blobToBase64(blob);
           // Remove the "data:image/png;base64," prefix
@@ -65,17 +68,26 @@ const getText = async (mainStreamManager: StreamManager) => {
           // 캡쳐 확인 테스트용
           // window.open(url, '_blank');
 
-          // ocr api
+          // caption api
           try {
-            const ocrResult = await getOcrText(base64String);
-            const extractedText = ocrResult.images[0].fields
-              .map((item: fieldType) => item.inferText)
-              .join(' ');
-            console.log('formatted OCR Result:', extractedText);
-            return extractedText;
+            const captionResult = await getCaption(base64String);
+            console.log('formatted Caption Result:', captionResult);
+            return captionResult;
           } catch (error) {
-            console.error('Failed to get OCR text:', error);
+            console.error('Failed to get Caption Text', error);
           }
+
+          // ocr api
+          // try {
+          //   const ocrResult = await getOcrText(base64String);
+          //   const extractedText = ocrResult.images[0].fields
+          //     .map((item: fieldType) => item.inferText)
+          //     .join(' ');
+          //   console.log('formatted OCR Result:', extractedText);
+          //   return extractedText;
+          // } catch (error) {
+          //   console.error('Failed to get OCR text:', error);
+          // }
         } else {
           console.error('Failed to create Blob from canvas');
         }

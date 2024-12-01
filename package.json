@@ -27,6 +27,7 @@
     "franc": "^6.2.0",
     "jquery": "^3.7.1",
     "next": "14.2.15",
+    "openai": "^4.73.1",
     "openvidu-browser": "^2.30.1",
     "openvidu-node-client": "^2.30.0",
     "react": "^18",
