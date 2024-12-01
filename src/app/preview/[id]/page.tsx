@@ -21,15 +21,17 @@ const DATA = {
 const Preview = () => {
   const router = useRouter();
   const params = useParams();
-  window.sessionStorage.removeItem('firstLoadDone');
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
 
-  // 단축키 설정 정보
   useEffect(() => {
-    if (window.sessionStorage.getItem('shortcut') === 'true') {
+    // 회의실 새로고침
+    window.sessionStorage.removeItem('firstLoadDone');
+
+    // 단축키 설정 정보
+    if (window.localStorage.getItem('shortcut') === 'true') {
       setIsShortcut(true);
     }
-  }, [window.sessionStorage.getItem('shortcut')]);
+  }, []);
 
   // const {
   //   videoRef,
@@ -66,7 +68,15 @@ const Preview = () => {
         audio: isMicOn,
         video: isCameraOn,
       });
+
       setStream(mediaStream);
+
+      // 오디오 출력 방지
+      const audioTracks = mediaStream.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = false; // 오디오 출력 비활성화
+      });
+
       if (videoRef?.current) {
         videoRef.current.srcObject = mediaStream;
       }

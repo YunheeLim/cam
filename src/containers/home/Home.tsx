@@ -37,16 +37,6 @@ const Home = () => {
   // 회의 생성 단축키: 1
   useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard });
 
-  const handleKeyboard = () => {
-    setTempKeyBoard(prev => !prev);
-  };
-
-  // 단축키 설정 저장
-  const saveKeyboard = () => {
-    setIsKeyBoard(tempKeyboard);
-    localStorage.setItem('shortcut', JSON.stringify(tempKeyboard));
-  };
-
   // 회의 참가
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -58,6 +48,20 @@ const Home = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  // 단축키 토글
+  const handleKeyboard = () => {
+    setTempKeyBoard(prev => !prev);
+  };
+
+  // 단축키 설정 저장
+  const saveKeyboard = () => {
+    setIsKeyBoard(tempKeyboard);
+    localStorage.setItem('shortcut', JSON.stringify(tempKeyboard));
+  };
+
+  // 단축키 설정 저장 단축키: s
+  useHotkeys('s', saveKeyboard);
 
   // 시간
   useEffect(() => {
