@@ -1,10 +1,7 @@
 import blobToBase64 from './blobToBase64';
 import { StreamManager } from 'openvidu-browser';
 import getOcrText from './getOcr';
-import { useState, useEffect } from 'react';
-// import getCaption from './getSKCaption';
 import getCaption from './getCaption';
-import resizeImageBlob from './resizeImageBlob';
 
 interface fieldType {
   inferConfidence: number;
@@ -35,6 +32,7 @@ interface itemType {
 }
 
 const getText = async (mainStreamManager: StreamManager) => {
+  // 최종 텍스트
   let returnText = '';
 
   if (mainStreamManager?.stream) {
