@@ -17,11 +17,12 @@ const Home = () => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isKeyboard, setIsKeyBoard] = useState(false);
+  const [tempKeyboard, setTempKeyBoard] = useState(false); // 토글만
+  const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
 
   useEffect(() => {
     if (localStorage.getItem('shortcut') === 'true') {
-      setIsKeyBoard(true);
+      setTempKeyBoard(true);
     }
   }, []);
 
@@ -36,12 +37,14 @@ const Home = () => {
   // 회의 생성 단축키: 1
   useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard });
 
-  // 단축키 설정
   const handleKeyboard = () => {
-    setIsKeyBoard(prev => {
-      localStorage.setItem('shortcut', JSON.stringify(!prev));
-      return !prev;
-    });
+    setTempKeyBoard(prev => !prev);
+  };
+
+  // 단축키 설정 저장
+  const saveKeyboard = () => {
+    setIsKeyBoard(tempKeyboard);
+    localStorage.setItem('shortcut', JSON.stringify(tempKeyboard));
   };
 
   // 회의 참가
@@ -104,10 +107,12 @@ const Home = () => {
         <div className="my-10 h-px w-4/6 bg-primary"></div>
         <div className="flex w-full flex-col items-center sm:w-[416px]">
           {/* <Accessibility>스크린 리더</Accessibility> */}
-          <Accessibility isToggled={isKeyboard} onClick={handleKeyboard}>
+          <Accessibility isToggled={tempKeyboard} onClick={handleKeyboard}>
             단축키
           </Accessibility>
-          <Button className="mt-3 w-full">저장</Button>
+          <Button onClick={saveKeyboard} className="mt-3 w-full">
+            저장
+          </Button>
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} />

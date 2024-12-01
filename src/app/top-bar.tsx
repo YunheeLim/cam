@@ -1,11 +1,12 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Logo from '../../public/svgs/logo.svg';
 import Profile from '../../public/svgs/profile.svg';
 
 export function TopBar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div
@@ -13,7 +14,7 @@ export function TopBar() {
         pathname.includes('/meeting') ? 'bg-black' : 'bg-white'
       } `}
     >
-      <div className="flex">
+      <div onClick={() => router.push('/')} className="flex cursor-pointer">
         <Logo width={30} height={30} />
         <h1 className="mx-2 text-3xl font-semibold text-primary">C.A.M</h1>
       </div>
