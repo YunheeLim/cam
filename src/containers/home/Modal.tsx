@@ -8,29 +8,46 @@ import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 interface ModalProps {
-  isOpen: boolean;
   onClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const Modal: React.FC<ModalProps> = ({ onClose }) => {
   const router = useRouter();
   const [text, setText] = useState('');
+  const [warning, setWarning] = useState('');
 
-  if (!isOpen) return null;
-
+  // 인풋값
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   };
 
+  // 모달창 외부 클릭 시 모달 닫힘
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
+  // 회의 참가
   const handleJoinClick = () => {
-    router.push(`/preview/${text}?type=exist`);
+    if (text === '') {
+    } else {
+      router.push(`/preview/${text}?type=exist`);
+    }
   };
+
+  // 회의 참가 단축키: enter
+  useHotkeys(
+    'enter',
+    () => {
+      if (true) {
+        handleJoinClick();
+      }
+    },
+    {
+      enabled: true, // Always call the hook
+    },
+  );
 
   return (
     <div
