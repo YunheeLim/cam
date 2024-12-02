@@ -27,6 +27,7 @@ import { HiOutlineSpeakerXMark as SpeakerOff } from 'react-icons/hi2';
 import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
+import DeviceModal from '@/components/DeviceModal';
 
 declare global {
   interface ImageCapture {
@@ -64,8 +65,28 @@ const Meeting = () => {
   const [isOcrOn, setIsOcrOn] = useState(false);
   const [numParticipants, setNumParticipants] = useState(0);
 
-  const { videoRef, stream, isCameraOn, setIsCameraOn, isMicOn, setIsMicOn } =
-    useVideo();
+  const {
+    videoRef,
+    stream,
+    isCameraOn,
+    setIsCameraOn,
+    isMicOn,
+    setIsMicOn,
+    selectedVideoDeviceId,
+    setSelectedVideoDeviceId,
+    selectedAudioDeviceId,
+    setSelectedAudioDeviceId,
+    videoDevices,
+    setVideoDevices,
+    audioDevices,
+    setAudioDevices,
+  } = useVideo();
+  const [isVideoListOpen, setIsVideoListOpen] = useState(false);
+  const [isAudioListOpen, setIsAudioListOpen] = useState(false);
+  const [prevVideoDeviceId, setPrevVideoDeviceId] = useState<string>('');
+  const [prevAudioDeviceId, setPrevAudioDeviceId] = useState<string>('');
+  const [isNewStream, setIsNewStream] = useState(false); // 기기 변경으로 인한 새 스트림 생성 여부
+
   const [capturedImage, setCapturedImage] = useState<string | null>(null); // 캡쳐 이미지
   const canvasRef = useRef<HTMLCanvasElement>(null); // 프레임 변화 감지를 위한 canvas
   const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
@@ -260,19 +281,8 @@ const Meeting = () => {
 
       // TODO: 기기 선택
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
-        audioSource: undefined,
-        videoSource: undefined,
-        // audioSource: `${
-        //   myUserName === '홍길동'
-        //     ? '3052a7363995d0911d79fc27fd495c185c4964c6985b9ef272fc6c9a87e24a10'
-        //     : '4150853c45e99f19efb07e34636e513800d4216cd4a2df7d207ce5a7ec3da73f'
-        // }`,
-
-        // videoSource: `${
-        //   myUserName === '홍길동'
-        //     ? '2d0e68cd4af4f5e23b0c993490d2da1d954df4b63182f0e09cefa4d4bc7ca021'
-        //     : '2cbe83fcd8995e557500f4ff71bfb57c74bba1dfccd1c11c04c87c39dd45c070'
-        // }`,
+        audioSource: selectedAudioDeviceId,
+        videoSource: selectedVideoDeviceId,
         publishAudio: true,
         publishVideo: true,
         resolution: '640x480',
@@ -663,6 +673,18 @@ const Meeting = () => {
           >
             {isCameraOn ? <CameraOn /> : <CameraOff />}
           </Control>
+          {isVideoListOpen && (
+            <DeviceModal
+              page={'meeting'}
+              list={videoDevices}
+              selectedDeviceId={selectedVideoDeviceId}
+              prevDeviceId={prevVideoDeviceId}
+              onSetPrevDeviceId={setPrevVideoDeviceId}
+              onSetSelectedDeviceId={setSelectedVideoDeviceId}
+              onSetIsNewStream={setIsNewStream}
+              onClose={() => setIsVideoListOpen(false)}
+            />
+          )}
           <Control
             name="mic"
             OnClick={handleMicClick}
@@ -670,6 +692,18 @@ const Meeting = () => {
           >
             {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
           </Control>
+          {isVideoListOpen && (
+            <DeviceModal
+              page={'meeting'}
+              list={audioDevices}
+              selectedDeviceId={selectedAudioDeviceId}
+              prevDeviceId={prevAudioDeviceId}
+              onSetPrevDeviceId={setPrevAudioDeviceId}
+              onSetSelectedDeviceId={setSelectedAudioDeviceId}
+              onSetIsNewStream={setIsNewStream}
+              onClose={() => setIsAudioListOpen(false)}
+            />
+          )}
           {/* <Button
             name="speaker"
             onClick={handleOcrClick}

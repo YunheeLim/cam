@@ -14,6 +14,10 @@ interface VideoContextProps {
   setSelectedVideoDeviceId: React.Dispatch<React.SetStateAction<string>>;
   selectedAudioDeviceId: string;
   setSelectedAudioDeviceId: React.Dispatch<React.SetStateAction<string>>;
+  videoDevices: MediaDeviceInfo[];
+  setVideoDevices: React.Dispatch<React.SetStateAction<MediaDeviceInfo[]>>;
+  audioDevices: MediaDeviceInfo[];
+  setAudioDevices: React.Dispatch<React.SetStateAction<MediaDeviceInfo[]>>;
 }
 
 const VideoContext = createContext<VideoContextProps | undefined>(undefined);
@@ -29,6 +33,8 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<string>('');
   const [selectedAudioDeviceId, setSelectedAudioDeviceId] =
     useState<string>('');
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
 
   return (
     <VideoContext.Provider
@@ -44,6 +50,10 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedVideoDeviceId,
         selectedAudioDeviceId,
         setSelectedAudioDeviceId,
+        videoDevices,
+        setVideoDevices,
+        audioDevices,
+        setAudioDevices,
       }}
     >
       {children}

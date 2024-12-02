@@ -43,10 +43,12 @@ const Preview = () => {
     setSelectedVideoDeviceId,
     selectedAudioDeviceId,
     setSelectedAudioDeviceId,
+    videoDevices,
+    setVideoDevices,
+    audioDevices,
+    setAudioDevices,
   } = useVideo();
 
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
   const [prevVideoDeviceId, setPrevVideoDeviceId] = useState<string>('');
   const [prevAudioDeviceId, setPrevAudioDeviceId] = useState<string>('');
   const [isNewStream, setIsNewStream] = useState(false); // 기기 변경으로 인한 새 스트림 생성 여부
@@ -325,6 +327,7 @@ const Preview = () => {
               </Control>
               {isVideoListOpen && (
                 <DeviceModal
+                  page={'preview'}
                   list={videoDevices}
                   selectedDeviceId={selectedVideoDeviceId}
                   prevDeviceId={prevVideoDeviceId}
@@ -346,6 +349,7 @@ const Preview = () => {
               </Control>
               {isAudioListOpen && (
                 <DeviceModal
+                  page={'preview'}
                   list={audioDevices}
                   selectedDeviceId={selectedAudioDeviceId}
                   prevDeviceId={prevAudioDeviceId}

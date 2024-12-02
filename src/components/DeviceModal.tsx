@@ -2,6 +2,7 @@ import CheckIcon from '../../public/svgs/check.svg';
 import { FaCheck } from 'react-icons/fa6';
 
 interface DeviceModalProps {
+  page: string;
   list: MediaDeviceInfo[];
   selectedDeviceId: string;
   prevDeviceId: string;
@@ -19,6 +20,7 @@ interface ItemProps {
 }
 
 const DeviceModal: React.FC<DeviceModalProps> = ({
+  page,
   list,
   selectedDeviceId,
   prevDeviceId,
@@ -37,7 +39,11 @@ const DeviceModal: React.FC<DeviceModalProps> = ({
   };
 
   return (
-    <div className="absolute left-0 top-14 w-fit overflow-hidden rounded-lg bg-primary shadow-lg">
+    <div
+      className={`absolute left-0 ${
+        page === 'meeting' ? 'bottom-14' : 'top-14'
+      }  w-fit overflow-hidden rounded-lg bg-primary shadow-lg`}
+    >
       {list?.map((item: ItemProps) => (
         <div
           key={item.deviceId}
