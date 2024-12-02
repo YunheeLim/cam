@@ -28,6 +28,7 @@ import getText from '@/lib/getText';
 import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
+import ExitModal from '@/containers/meeting/ExitModal';
 
 declare global {
   interface ImageCapture {
@@ -42,21 +43,10 @@ declare global {
   };
 }
 // OpenVidu global variables
-let OVCamera: any;
-let OVScreen: any;
-let sessionCamera: Session;
+
 let sessionScreen: Session;
 
-// User name and session name global variables
-let myUserName: string;
-let mySessionId: string;
-const screensharing = false;
-
 const APPLICATION_SERVER_URL = 'http://localhost:5000/';
-
-const DATA = {
-  user_name: '홍길동',
-};
 
 const Meeting = () => {
   const router = useRouter();
@@ -64,6 +54,7 @@ const Meeting = () => {
   const searchParams = useSearchParams();
   const [isOcrOn, setIsOcrOn] = useState(false);
   const [numParticipants, setNumParticipants] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     videoRef,
@@ -598,6 +589,15 @@ const Meeting = () => {
   // 화면 캡쳐 및 ocr 단축키
   useHotkeys('ctrl+o', handleCapture, { enabled: isShortcut });
 
+  // 회의 나가기 버튼 클릭
+  const handleExitClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   // 회의 나가기
   useHotkeys('esc', leaveSession, { enabled: isShortcut });
 
@@ -609,127 +609,129 @@ const Meeting = () => {
   // }, []);
 
   return (
-    <div
-      onClick={handleBackgroundClick}
-      className="flex h-full w-full flex-col justify-center bg-black"
-    >
+    <>
+      {isModalOpen && <ExitModal onOk={leaveSession} onClose={closeModal} />}
       <div
-        id="session"
-        className={`flex h-video-container w-full ${
-          mainStreamManager
-            ? 'flex-row items-center gap-4'
-            : 'flex-col overflow-auto'
-        }
-       justify-center px-6`}
-      >
-        {mainStreamManager && (
-          <>
-            <div id="main-video" ref={sharedScreenRef} className="w-4/6">
-              <UserVideoComponent streamManager={mainStreamManager} />
-            </div>
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
-          </>
-        )}
-        <div
-          id="video-container"
-          // className="flex h-full w-full items-center justify-center"
-          className={`${
-            mainStreamManager
-              ? 'flex max-h-video-container flex-col overflow-auto'
-              : subscribers.length === 0
-              ? 'grid h-video-container grid-cols-1 items-center justify-center px-1/10'
-              : subscribers.length === 1
-              ? 'grid h-video-container grid-cols-2 items-center justify-center'
-              : subscribers.length <= 3
-              ? 'grid h-video-container grid-cols-2 items-center justify-center px-1/10'
-              : 'grid h-video-container grid-cols-3 items-center justify-center'
-          } gap-4`}
-        >
-          {publisher && (
-            <div
-              id="stream-container"
-              className={`${mainStreamManager ? ' w-60' : ''}`}
-              onClick={() => {
-                // handleMainVideoStream(publisher)
-              }}
-            >
-              <UserVideoComponent streamManager={publisher} />
-            </div>
-          )}
-          {subscribers.map((sub, i) => {
-            // 공유된 화면은 제외 (메인 스트림에 있음)
-            return (
-              sub.stream.typeOfVideo !== 'SCREEN' && (
-                <div
-                  key={i}
-                  id="stream-container"
-                  className={`${mainStreamManager ? ' w-60' : ''}`}
-                  onClick={() => {
-                    // handleMainVideoStream(sub)
-                  }}
-                >
-                  <UserVideoComponent streamManager={sub} />
-                </div>
-              )
-            );
-          })}
-        </div>
-      </div>
-      {/* 픽셀 변화 감지 확인용 */}
-      {capturedImage && intervalIdRef.current && (
-        <div className="mt-4 h-80 w-80">
-          <img src={capturedImage} alt="Captured preview" className="mt-2" />
-        </div>
-      )}
-      {/* Bottom bar */}
-      <div
-        className="relative flex h-24 w-full flex-row justify-between p-6"
         onClick={handleBackgroundClick}
+        className="flex h-full w-full flex-col justify-center bg-black"
       >
-        <div className="flex gap-4" onClick={handleBackgroundClick}>
-          <div className="relative" onClick={handleBackgroundClick}>
-            <Control
-              name="camera"
-              OnClick={handleCameraClick} // mute or unmute
-              OnMoreClick={handleVideoListClick} // 카메라 기기 선택
-            >
-              {isCameraOn ? <CameraOn /> : <CameraOff />}
-            </Control>
-            {isVideoListOpen && (
-              <DeviceModal
-                page={'meeting'}
-                list={videoDevices}
-                selectedDeviceId={selectedVideoDeviceId}
-                prevDeviceId={prevVideoDeviceId}
-                onSetPrevDeviceId={setPrevVideoDeviceId}
-                onSetSelectedDeviceId={setSelectedVideoDeviceId}
-                onSetIsNewStream={setIsNewStream}
-                onClose={() => setIsVideoListOpen(false)}
-              />
+        <div
+          id="session"
+          className={`flex h-video-container w-full ${
+            mainStreamManager
+              ? 'flex-row items-center gap-4'
+              : 'flex-col overflow-auto'
+          }
+       justify-center px-6`}
+        >
+          {mainStreamManager && (
+            <>
+              <div id="main-video" ref={sharedScreenRef} className="w-4/6">
+                <UserVideoComponent streamManager={mainStreamManager} />
+              </div>
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+            </>
+          )}
+          <div
+            id="video-container"
+            // className="flex h-full w-full items-center justify-center"
+            className={`${
+              mainStreamManager
+                ? 'flex max-h-video-container flex-col overflow-auto'
+                : subscribers.length === 0
+                ? 'grid h-video-container grid-cols-1 items-center justify-center px-1/10'
+                : subscribers.length === 1
+                ? 'grid h-video-container grid-cols-2 items-center justify-center'
+                : subscribers.length <= 3
+                ? 'grid h-video-container grid-cols-2 items-center justify-center px-1/10'
+                : 'grid h-video-container grid-cols-3 items-center justify-center'
+            } gap-4`}
+          >
+            {publisher && (
+              <div
+                id="stream-container"
+                className={`${mainStreamManager ? ' w-60' : ''}`}
+                onClick={() => {
+                  // handleMainVideoStream(publisher)
+                }}
+              >
+                <UserVideoComponent streamManager={publisher} />
+              </div>
             )}
+            {subscribers.map((sub, i) => {
+              // 공유된 화면은 제외 (메인 스트림에 있음)
+              return (
+                sub.stream.typeOfVideo !== 'SCREEN' && (
+                  <div
+                    key={i}
+                    id="stream-container"
+                    className={`${mainStreamManager ? ' w-60' : ''}`}
+                    onClick={() => {
+                      // handleMainVideoStream(sub)
+                    }}
+                  >
+                    <UserVideoComponent streamManager={sub} />
+                  </div>
+                )
+              );
+            })}
           </div>
-          <div className="relative" onClick={handleBackgroundClick}>
-            <Control
-              name="mic"
-              OnClick={handleMicClick}
-              OnMoreClick={handleAudioListClick} // 카메라 기기 선택
-            >
-              {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
-            </Control>
-            {isAudioListOpen && (
-              <DeviceModal
-                page={'meeting'}
-                list={audioDevices}
-                selectedDeviceId={selectedAudioDeviceId}
-                prevDeviceId={prevAudioDeviceId}
-                onSetPrevDeviceId={setPrevAudioDeviceId}
-                onSetSelectedDeviceId={setSelectedAudioDeviceId}
-                onSetIsNewStream={setIsNewStream}
-                onClose={() => setIsAudioListOpen(false)}
-              />
-            )}
+        </div>
+        {/* 픽셀 변화 감지 확인용 */}
+        {capturedImage && intervalIdRef.current && (
+          <div className="mt-4 h-80 w-80">
+            <img src={capturedImage} alt="Captured preview" className="mt-2" />
           </div>
-          {/* <Button
+        )}
+        {/* Bottom bar */}
+        <div
+          className="relative flex h-24 w-full flex-row justify-between p-6"
+          onClick={handleBackgroundClick}
+        >
+          <div className="flex gap-4" onClick={handleBackgroundClick}>
+            <div className="relative" onClick={handleBackgroundClick}>
+              <Control
+                name="camera"
+                OnClick={handleCameraClick} // mute or unmute
+                OnMoreClick={handleVideoListClick} // 카메라 기기 선택
+              >
+                {isCameraOn ? <CameraOn /> : <CameraOff />}
+              </Control>
+              {isVideoListOpen && (
+                <DeviceModal
+                  page={'meeting'}
+                  list={videoDevices}
+                  selectedDeviceId={selectedVideoDeviceId}
+                  prevDeviceId={prevVideoDeviceId}
+                  onSetPrevDeviceId={setPrevVideoDeviceId}
+                  onSetSelectedDeviceId={setSelectedVideoDeviceId}
+                  onSetIsNewStream={setIsNewStream}
+                  onClose={() => setIsVideoListOpen(false)}
+                />
+              )}
+            </div>
+            <div className="relative" onClick={handleBackgroundClick}>
+              <Control
+                name="mic"
+                OnClick={handleMicClick}
+                OnMoreClick={handleAudioListClick} // 카메라 기기 선택
+              >
+                {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
+              </Control>
+              {isAudioListOpen && (
+                <DeviceModal
+                  page={'meeting'}
+                  list={audioDevices}
+                  selectedDeviceId={selectedAudioDeviceId}
+                  prevDeviceId={prevAudioDeviceId}
+                  onSetPrevDeviceId={setPrevAudioDeviceId}
+                  onSetSelectedDeviceId={setSelectedAudioDeviceId}
+                  onSetIsNewStream={setIsNewStream}
+                  onClose={() => setIsAudioListOpen(false)}
+                />
+              )}
+            </div>
+            {/* <Button
             name="speaker"
             onClick={handleOcrClick}
             className="gap-2 px-2"
@@ -746,40 +748,41 @@ const Meeting = () => {
               </>
             )}
           </Button> */}
-          <Button
-            onClick={handleCapture}
-            disabled={!mainStreamManager} // 버튼 비활성화
-            className={`gap-2 px-4 ${
-              mainStreamManager ? '' : '!text-gray-400 hover:!bg-primary'
-            }`}
-          >
-            <RiSpeakLine size={32} />
-            {isReading ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
-          </Button>
+            <Button
+              onClick={handleCapture}
+              disabled={!mainStreamManager} // 버튼 비활성화
+              className={`gap-2 px-4 ${
+                mainStreamManager ? '' : '!text-gray-400 hover:!bg-primary'
+              }`}
+            >
+              <RiSpeakLine size={32} />
+              {isReading ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
+            </Button>
+          </div>
+          <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
+            <Button onClick={publishScreenShare} className="p-2">
+              <ScreenShareIcon />
+            </Button>
+            <Button
+              onClick={handleExitClick}
+              className="bg-secondary p-2 hover:bg-secondary-hover"
+            >
+              <ExitIcon />
+            </Button>
+          </div>
+          <div className="flex gap-4">
+            <Button className="flex gap-2 p-2 font-semibold">
+              <PeopleIcon />
+              {numParticipants}
+            </Button>
+            <Button className="p-2">
+              <SettingIcon fill={'#ffffff'} />
+            </Button>
+          </div>
         </div>
-        <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
-          <Button onClick={publishScreenShare} className="p-2">
-            <ScreenShareIcon />
-          </Button>
-          <Button
-            onClick={leaveSession}
-            className="bg-secondary p-2 hover:bg-secondary-hover"
-          >
-            <ExitIcon />
-          </Button>
-        </div>
-        <div className="flex gap-4">
-          <Button className="flex gap-2 p-2 font-semibold">
-            <PeopleIcon />
-            {numParticipants}
-          </Button>
-          <Button className="p-2">
-            <SettingIcon fill={'#ffffff'} />
-          </Button>
-        </div>
+        {/* <BottomBar /> */}
       </div>
-      {/* <BottomBar /> */}
-    </div>
+    </>
   );
 };
 
