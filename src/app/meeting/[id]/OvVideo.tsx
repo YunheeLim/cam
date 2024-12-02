@@ -11,7 +11,7 @@ const OpenViduVideoComponent: React.FC<OpenViduVideoComponentProps> =
 
     useEffect(() => {
       if (videoRef.current) {
-        streamManager.addVideoElement(videoRef.current);
+        streamManager?.addVideoElement(videoRef.current);
       }
     }, [streamManager]);
 

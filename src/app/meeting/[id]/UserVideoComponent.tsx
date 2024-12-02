@@ -10,10 +10,10 @@ interface UserVideoComponentProps {
 const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
   ({ streamManager }, screenRef) => {
     const [videoActive, setVideoActive] = useState(
-      streamManager.stream.videoActive,
+      streamManager?.stream?.videoActive,
     );
     const [audioActive, setAudioActive] = useState(
-      streamManager.stream.audioActive,
+      streamManager?.stream?.audioActive,
     );
     const [bgColor, setBgColor] = useState('');
 
@@ -39,7 +39,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
 
     // 네임태그
     const getNicknameTag = () => {
-      if (streamManager.stream.typeOfVideo == 'SCREEN') {
+      if (streamManager?.stream?.typeOfVideo == 'SCREEN') {
         // console.log(streamManager);
         const jsonString = streamManager?.stream?.session?.options?.metadata;
         const parsedData = JSON.parse(jsonString);
@@ -47,7 +47,7 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
         return `공유 화면`;
       } else {
         // Gets the nickName of the user
-        return JSON.parse(streamManager.stream.connection.data).clientData;
+        return JSON.parse(streamManager?.stream?.connection.data).clientData;
       }
     };
 
@@ -83,11 +83,12 @@ const UserVideoComponent: React.FC<UserVideoComponentProps> = forwardRef(
               </div>
             )}
             {/* 마이크 off (공유 화면은 제외) */}
-            {!audioActive && streamManager.stream.typeOfVideo !== 'SCREEN' && (
-              <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
-                <MicOff width={16} height={16} />
-              </div>
-            )}
+            {!audioActive &&
+              streamManager?.stream?.typeOfVideo !== 'SCREEN' && (
+                <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#293042]">
+                  <MicOff width={16} height={16} />
+                </div>
+              )}
           </div>
         ) : null}
       </div>

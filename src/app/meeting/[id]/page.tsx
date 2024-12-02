@@ -136,11 +136,6 @@ const Meeting = () => {
     }
   };
 
-  // 비디오 디바이스 선택
-  const handleCameraDeviceClick = () => {
-    console.log(videoDeviceList);
-  };
-
   // 마이크 mute/unmute
   const handleMicClick = () => {
     if (publisher) {
@@ -149,9 +144,24 @@ const Meeting = () => {
     }
   };
 
-  // 오디오 디바이스 선택
-  const handleMicDeviceClick = () => {
-    console.log(audioDeviceList);
+  // 비디오 기기 리스트 모달
+  const handleVideoListClick = () => {
+    setIsAudioListOpen(false);
+    setIsVideoListOpen(prev => !prev);
+  };
+
+  // 오디오 기기 리스트 모달
+  const handleAudioListClick = () => {
+    setIsVideoListOpen(false);
+    setIsAudioListOpen(prev => !prev);
+  };
+
+  // 모달창 외부 클릭 시 모달 닫힘
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsVideoListOpen(false);
+      setIsAudioListOpen(false);
+    }
   };
 
   // 프레임 변화 시 자동 감지 되는 ocr
@@ -279,7 +289,6 @@ const Meeting = () => {
       const token = await getToken();
       await newSession.connect(token, { clientData: myUserName });
 
-      // TODO: 기기 선택
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
         audioSource: selectedAudioDeviceId,
         videoSource: selectedVideoDeviceId,
@@ -310,7 +319,6 @@ const Meeting = () => {
 
         setPublisher(newPublisher);
         // setMainStreamManager(newPublisher);
-        setCurrentVideoDevice(currentDevice);
         setSession(newSession);
         setScreenSharing(false);
       }
@@ -319,32 +327,69 @@ const Meeting = () => {
     }
   };
 
-  // 비디오/오디오 기기 목록
-  // useEffect(() => {
-  //   const fetchDevices = async () => {
-  //     try {
-  //       const devices = await OV.current?.getDevices();
-  //       if (devices) {
-  //         const videoDevices = devices.filter(
-  //           device => device.kind === 'videoinput',
-  //         );
-  //         console.log(videoDevices);
-  //         setVideoDeviceList(videoDevices);
+  // 카메라 교체
+  const changeCamera = async (deviceId: string) => {
+    try {
+      if (!publisher) {
+        console.warn('No publisher to replace track on');
+        return;
+      }
 
-  //         const audioDevices = devices.filter(
-  //           device => device.kind === 'audioinput',
-  //         );
-  //         console.log(audioDevices);
-  //         setAudioDeviceList(audioDevices);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching devices:', error);
-  //     }
-  //   };
+      // 새로운 비디오 트랙 생성
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: deviceId } },
+      });
+      const newTrack = mediaStream.getVideoTracks()[0];
 
-  //   fetchDevices();
-  // }, [joinSession]);
+      // 기존 트랙 교체
+      await publisher.replaceTrack(newTrack);
+      console.log('Camera switched successfully!');
 
+      // 상태 업데이트
+      // setSelectedVideoDeviceId(deviceId); // 선택된 카메라 업데이트
+      setPrevVideoDeviceId(deviceId);
+    } catch (error) {
+      console.error('Error switching camera:', error);
+    }
+    setIsNewStream(false);
+  };
+
+  // 오디오 교체
+  const changeAudioDevice = async (deviceId: string) => {
+    try {
+      if (!publisher) {
+        console.warn('No publisher to replace audio track on');
+        return;
+      }
+
+      // 새로운 오디오 트랙 생성
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+      });
+      const newTrack = mediaStream.getAudioTracks()[0];
+
+      // 기존 오디오 트랙 교체
+      await publisher.replaceTrack(newTrack);
+      console.log('Audio device switched successfully!');
+
+      // 상태 업데이트
+      // setSelectedAudioDeviceId(deviceId); // 선택된 오디오 장치 ID 업데이트
+      setPrevAudioDeviceId(deviceId);
+    } catch (error) {
+      console.error('Error switching audio device:', error);
+    }
+    setIsNewStream(false);
+  };
+
+  // 다른 기기가 선택되면 비디오 기기 변경
+  useEffect(() => {
+    if (isNewStream) {
+      changeCamera(selectedVideoDeviceId);
+      changeAudioDevice(selectedAudioDeviceId);
+    }
+  }, [isNewStream]);
+
+  // 화면 공유 스트림 생성
   const publishScreenShare = async () => {
     OVScreen.current = new OpenVidu();
     const sessionScreen = OVScreen.current.initSession();
@@ -413,36 +458,6 @@ const Meeting = () => {
     setScreenPublisher(undefined);
 
     router.push('/');
-  };
-
-  const switchCamera = async () => {
-    if (OV.current && currentVideoDevice) {
-      try {
-        const devices = await OV.current.getDevices();
-        const videoDevices = devices.filter(
-          device => device.kind === 'videoinput',
-        );
-        const newVideoDevice = videoDevices.find(
-          device => device.deviceId !== currentVideoDevice.deviceId,
-        );
-
-        if (newVideoDevice && session && publisher) {
-          const newPublisher = OV.current.initPublisher(undefined, {
-            videoSource: newVideoDevice.deviceId,
-            publishAudio: true,
-            publishVideo: true,
-            mirror: true,
-          });
-          await session.unpublish(publisher);
-          await session.publish(newPublisher);
-          setCurrentVideoDevice(newVideoDevice);
-          setMainStreamManager(newPublisher);
-          setPublisher(newPublisher);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
   };
 
   const getToken = async () => {
@@ -594,7 +609,10 @@ const Meeting = () => {
   // }, []);
 
   return (
-    <div className="flex h-full w-full flex-col justify-center bg-black">
+    <div
+      onClick={handleBackgroundClick}
+      className="flex h-full w-full flex-col justify-center bg-black"
+    >
       <div
         id="session"
         className={`flex h-video-container w-full ${
@@ -664,46 +682,53 @@ const Meeting = () => {
         </div>
       )}
       {/* Bottom bar */}
-      <div className="relative flex h-24 w-full flex-row justify-between p-6">
-        <div className="flex gap-4">
-          <Control
-            name="camera"
-            OnClick={handleCameraClick} // mute or unmute
-            OnMoreClick={handleCameraDeviceClick} // 카메라 기기 선택
-          >
-            {isCameraOn ? <CameraOn /> : <CameraOff />}
-          </Control>
-          {isVideoListOpen && (
-            <DeviceModal
-              page={'meeting'}
-              list={videoDevices}
-              selectedDeviceId={selectedVideoDeviceId}
-              prevDeviceId={prevVideoDeviceId}
-              onSetPrevDeviceId={setPrevVideoDeviceId}
-              onSetSelectedDeviceId={setSelectedVideoDeviceId}
-              onSetIsNewStream={setIsNewStream}
-              onClose={() => setIsVideoListOpen(false)}
-            />
-          )}
-          <Control
-            name="mic"
-            OnClick={handleMicClick}
-            OnMoreClick={handleMicDeviceClick} // 카메라 기기 선택
-          >
-            {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
-          </Control>
-          {isVideoListOpen && (
-            <DeviceModal
-              page={'meeting'}
-              list={audioDevices}
-              selectedDeviceId={selectedAudioDeviceId}
-              prevDeviceId={prevAudioDeviceId}
-              onSetPrevDeviceId={setPrevAudioDeviceId}
-              onSetSelectedDeviceId={setSelectedAudioDeviceId}
-              onSetIsNewStream={setIsNewStream}
-              onClose={() => setIsAudioListOpen(false)}
-            />
-          )}
+      <div
+        className="relative flex h-24 w-full flex-row justify-between p-6"
+        onClick={handleBackgroundClick}
+      >
+        <div className="flex gap-4" onClick={handleBackgroundClick}>
+          <div className="relative" onClick={handleBackgroundClick}>
+            <Control
+              name="camera"
+              OnClick={handleCameraClick} // mute or unmute
+              OnMoreClick={handleVideoListClick} // 카메라 기기 선택
+            >
+              {isCameraOn ? <CameraOn /> : <CameraOff />}
+            </Control>
+            {isVideoListOpen && (
+              <DeviceModal
+                page={'meeting'}
+                list={videoDevices}
+                selectedDeviceId={selectedVideoDeviceId}
+                prevDeviceId={prevVideoDeviceId}
+                onSetPrevDeviceId={setPrevVideoDeviceId}
+                onSetSelectedDeviceId={setSelectedVideoDeviceId}
+                onSetIsNewStream={setIsNewStream}
+                onClose={() => setIsVideoListOpen(false)}
+              />
+            )}
+          </div>
+          <div className="relative" onClick={handleBackgroundClick}>
+            <Control
+              name="mic"
+              OnClick={handleMicClick}
+              OnMoreClick={handleAudioListClick} // 카메라 기기 선택
+            >
+              {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
+            </Control>
+            {isAudioListOpen && (
+              <DeviceModal
+                page={'meeting'}
+                list={audioDevices}
+                selectedDeviceId={selectedAudioDeviceId}
+                prevDeviceId={prevAudioDeviceId}
+                onSetPrevDeviceId={setPrevAudioDeviceId}
+                onSetSelectedDeviceId={setSelectedAudioDeviceId}
+                onSetIsNewStream={setIsNewStream}
+                onClose={() => setIsAudioListOpen(false)}
+              />
+            )}
+          </div>
           {/* <Button
             name="speaker"
             onClick={handleOcrClick}
