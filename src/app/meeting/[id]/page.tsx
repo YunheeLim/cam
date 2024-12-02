@@ -105,6 +105,9 @@ const Meeting = () => {
       window.sessionStorage.removeItem('firstLoadDone');
       router.replace('/');
     }
+
+    // 단축키 설정 정보
+    if (window.localStorage.getItem('shortcut') === 'true') setIsShortcut(true);
   }, []);
 
   useEffect(() => {
@@ -599,7 +602,7 @@ const Meeting = () => {
   };
 
   // 회의 나가기
-  useHotkeys('esc', leaveSession, { enabled: isShortcut });
+  useHotkeys('ctrl+q', handleExitClick, { enabled: isShortcut });
 
   // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {

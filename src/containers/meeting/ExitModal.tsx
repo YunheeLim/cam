@@ -14,12 +14,27 @@ interface ExitModalProps {
 }
 
 const ExitModal: React.FC<ExitModalProps> = ({ onOk, onClose }) => {
+  const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
+
+  // 단축키 설정 정보
+  useEffect(() => {
+    if (window.localStorage.getItem('shortcut') === 'true') {
+      setIsShortcut(true);
+    }
+  }, []);
+
+  // 모달창 닫기 or 나가기 취소 단축키: esc
+  useHotkeys('esc', onClose, { enabled: isShortcut });
+  // 회의 나가기 단축키: esc
+  useHotkeys('enter', onOk, { enabled: isShortcut });
+
   // 모달창 외부 클릭 시 모달 닫힘
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
   return (
     <div
       className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50 p-5"
