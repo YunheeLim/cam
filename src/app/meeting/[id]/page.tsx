@@ -332,29 +332,6 @@ const Meeting = () => {
       }
     });
 
-    // 발화자 오디오 다시 활성화
-    newSession.on('publisherStopSpeaking', event => {
-      // 스피커 활성화 상태일때만 실행
-      const speakingConnectionId = event.connection.connectionId;
-
-      console.log('start to speak:', speakingConnectionId);
-
-      if (isSpeakerOnRef.current) {
-        const speakingConnectionId = event.connection.connectionId;
-
-        subscribersRef.current.forEach(subscriber => {
-          if (subscriber) {
-            if (
-              subscriber.stream.connection.connectionId === speakingConnectionId
-            ) {
-              subscriber.subscribeToAudio(true); // 오디오 다시 활성화
-              console.log('Unmuted audio for the speaker');
-            }
-          }
-        });
-      }
-    });
-
     newSession.on('exception', exception => console.warn(exception));
 
     try {
