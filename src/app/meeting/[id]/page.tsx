@@ -29,6 +29,7 @@ import { getSpeechForOne, getSpeechForBoth } from '@/lib/getSpeech';
 import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
 import ExitModal from '@/containers/meeting/ExitModal';
+import ParticipantsModal from '@/containers/meeting/ParticipantsModal';
 
 declare global {
   interface ImageCapture {
@@ -87,6 +88,7 @@ const Meeting = () => {
   const [text, setText] = useState(''); // ocr 텍스트
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
   const [isReading, setIsReading] = useState(false); // ocr 텍스트 리딩 상태
+  const [isParticipantsOpen, setIsParticipantsOpen] = useState(false); // 참여자 리스트 모달
 
   // 단축키 설정 정보
   useEffect(() => {
@@ -150,11 +152,17 @@ const Meeting = () => {
     setIsAudioListOpen(prev => !prev);
   };
 
+  // 참여자 클릭
+  const handleParticipantsClick = () => {
+    setIsParticipantsOpen(prev => !prev);
+  };
+
   // 모달창 외부 클릭 시 모달 닫힘
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setIsVideoListOpen(false);
       setIsAudioListOpen(false);
+      setIsParticipantsOpen(false);
     }
   };
 
@@ -770,10 +778,21 @@ const Meeting = () => {
             </Button>
           </div>
           <div className="flex gap-4">
-            <Button className="flex gap-2 p-2 font-semibold">
-              <PeopleIcon />
-              {numParticipants}
-            </Button>
+            <div className="relative">
+              <Button
+                onClick={handleParticipantsClick}
+                className="flex gap-2 p-2 font-semibold"
+              >
+                <PeopleIcon />
+                {numParticipants}
+              </Button>
+              {publisher && isParticipantsOpen && (
+                <ParticipantsModal
+                  publisher={publisher}
+                  subscribers={subscribers}
+                />
+              )}
+            </div>
             <Button className="p-2">
               <SettingIcon fill={'#ffffff'} />
             </Button>
