@@ -1,6 +1,6 @@
 import Input from '@/components/Input';
 import { MdContentCopy } from 'react-icons/md';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface CopyMeetingIdProps {
   meetingId: string;
@@ -21,28 +21,36 @@ const CopyMeetingId: React.FC<CopyMeetingIdProps> = ({ meetingId }) => {
     }
   };
 
-  // 복사 후 팝업 알림
-  const handleShowPopup = () => {
-    setShowPopup(true); // 팝업 표시
-    setTimeout(() => {
-      setShowPopup(false); // 1초 후 팝업 숨기기
-    }, 1000); // 1000ms = 1초
-  };
+  // 복사 후 2초 팝업
+  useEffect(() => {
+    if (copyStatus) {
+      setTimeout(() => {
+        setCopyStatus('');
+      }, 1500);
+    }
+  }, [copyStatus]);
 
   return (
     <div
-      className={`absolute bottom-16 right-0 flex w-fit flex-col gap-2 overflow-hidden rounded-lg bg-white p-4 shadow-lg`}
+      className={`absolute bottom-20 right-0 w-fit rounded-lg bg-white p-4 shadow-lg`}
     >
-      <div className=" text-gray-700">
-        회의에 참여하기를 원하는 다른 사용자와 이 회의 ID를 공유하세요.
+      <div className="relative flex flex-col gap-2">
+        <div className=" text-gray-700">
+          회의에 참여하기를 원하는 다른 사용자와 이 회의 ID를 공유하세요.
+        </div>
+        <Input
+          className="bg-gray-200 pr-11"
+          defaultValue={meetingId}
+          disabled
+          icon={<MdContentCopy size={20} />}
+          onClick={handleCopy}
+        />
       </div>
-      <Input
-        className="bg-gray-200 pr-11"
-        defaultValue={meetingId}
-        disabled
-        icon={<MdContentCopy size={20} />}
-        onClick={handleCopy}
-      />
+      {copyStatus && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 transform rounded bg-black bg-opacity-70 px-4 py-2 text-white">
+          {copyStatus}
+        </div>
+      )}
     </div>
   );
 };

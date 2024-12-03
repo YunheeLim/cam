@@ -29,7 +29,7 @@ const ParticipantsModal: React.FC<ParticipantsModalProps> = ({
 
   return (
     <div
-      className={`absolute bottom-16 right-0 w-fit overflow-hidden rounded-lg bg-white shadow-lg`}
+      className={`absolute bottom-14 right-0 w-fit overflow-hidden rounded-lg bg-white shadow-lg`}
     >
       {participantsList?.map((item: string) => (
         <div
