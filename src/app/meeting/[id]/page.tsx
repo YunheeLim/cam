@@ -56,6 +56,21 @@ const Meeting = () => {
   const searchParams = useSearchParams();
   const [isOcrOn, setIsOcrOn] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true); // 공유 화면 읽기 시 발화자 오디오 비활성화 유무
+  const isSpeakerOnRef = useRef<boolean>(true); // 구독자 참조
+
+  useEffect(() => {
+    isSpeakerOnRef.current = isSpeakerOn;
+
+    // 다시 소리 켜기
+    if (isSpeakerOnRef.current && subscribersRef.current.length) {
+      subscribersRef.current.forEach(subscriber => {
+        console.log(subscriber);
+        subscriber.subscribeToAudio(true); // 발화자 음소거
+        console.log('Unmuted audio for the speaker');
+      });
+    }
+  }, [isSpeakerOn]);
+
   const [numParticipants, setNumParticipants] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -207,6 +222,7 @@ const Meeting = () => {
   const [mainStreamManager, setMainStreamManager] = useState<StreamManager>();
   const [publisher, setPublisher] = useState<Publisher>();
   const [subscribers, setSubscribers] = useState<StreamManager[]>([]);
+  const subscribersRef = useRef<StreamManager[]>([]); // 구독자 참조
   const [screenSession, setScreenSession] = useState<Session>();
   const [screenPublisher, setScreenPublisher] = useState<Publisher>();
   const [screenSharing, setScreenSharing] = useState(false);
@@ -274,6 +290,8 @@ const Meeting = () => {
       }
     });
     setNumParticipants(num);
+
+    subscribersRef.current = subscribers;
   }, [subscribers]);
 
   const joinSession = async () => {
@@ -294,40 +312,21 @@ const Meeting = () => {
       deleteSubscriber(event.stream.streamManager);
     });
 
-    // 발화자 오디오 제거
-    // newSession.on('publisherStartSpeaking', event => {
-    //   subscribers.forEach(subscriber => {
-    //     subscriber.subscribeToAudio(false); // 자신만 들리지 않게 설정
-    //     console.log('Muted audio for everyone');
-    //   });
-    //   // const speakingStreamId = event.connection.connectionId;
-    //   // console.log(speakingStreamId);
-
-    //   // // 발화자에 해당하는 Subscriber의 오디오 끄기
-    //   // subscribers.forEach(subscriber => {
-    //   //   if (subscriber.stream.connection.connectionId === speakingStreamId) {
-    //   //     subscriber.subscribeToAudio(false); // 자신만 들리지 않게 설정
-    //   //     console.log('Muted audio for the speaker');
-    //   //   }
-    //   // });
-    // });
-
     // 발화자 오디오 비활성화
     newSession.on('publisherStartSpeaking', event => {
-      // 스피커 비활성화 상태일때만 실행
-      if (!isSpeakerOn) {
-        const speakingConnectionId = event.connection.connectionId;
-        console.log(speakingConnectionId);
+      const speakingConnectionId = event.connection.connectionId;
+      console.log(speakingConnectionId);
+      console.log(subscribersRef.current); // 항상 최신 값
+      console.log('isSpeakerOn:', isSpeakerOnRef.current);
 
-        subscribers.forEach(subscriber => {
-          if (subscriber) {
-            // 발화자의 connectionId와 구독자의 connectionId 비교
-            if (
-              subscriber.stream.connection.connectionId === speakingConnectionId
-            ) {
-              subscriber.subscribeToAudio(false); // 발화자 음소거
-              console.log('Muted audio for the speaker');
-            }
+      if (!isSpeakerOnRef.current && subscribersRef.current.length) {
+        subscribersRef.current.forEach(subscriber => {
+          console.log(subscriber);
+          if (
+            subscriber.stream.connection.connectionId === speakingConnectionId
+          ) {
+            subscriber.subscribeToAudio(false); // 발화자 음소거
+            console.log('Muted audio for the speaker');
           }
         });
       }
@@ -336,10 +335,14 @@ const Meeting = () => {
     // 발화자 오디오 다시 활성화
     newSession.on('publisherStopSpeaking', event => {
       // 스피커 활성화 상태일때만 실행
-      if (isSpeakerOn) {
+      const speakingConnectionId = event.connection.connectionId;
+
+      console.log('start to speak:', speakingConnectionId);
+
+      if (isSpeakerOnRef.current) {
         const speakingConnectionId = event.connection.connectionId;
 
-        subscribers.forEach(subscriber => {
+        subscribersRef.current.forEach(subscriber => {
           if (subscriber) {
             if (
               subscriber.stream.connection.connectionId === speakingConnectionId
