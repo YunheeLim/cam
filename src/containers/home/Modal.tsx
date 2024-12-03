@@ -48,17 +48,17 @@ const Modal: React.FC<ModalProps> = ({ onClose }) => {
       className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50 p-5"
       onClick={handleBackgroundClick}
     >
-      <div className="relative flex h-56 w-96 flex-col rounded-2xl bg-white p-5">
+      <div className="relative flex h-52 w-96 flex-col rounded-2xl bg-white p-5">
         <div className="absolute right-5 top-5">
           <button onClick={onClose}>
             <CloseIcon />
           </button>
         </div>
         <h1 className="text-lg font-semibold">회의 참가</h1>
-        <div className="mt-5 flex flex-grow flex-col items-center justify-between">
+        <div className="mt-4 flex flex-grow flex-col items-center justify-between">
           <div className="flex w-full flex-col">
             <Input onChange={handleChange} placeholder="회의 ID" />
-            <div className="mt-1 px-2 text-sm font-medium text-red-500">
+            <div className=" px-2 text-sm font-medium text-red-500">
               {warning}
             </div>
           </div>
