@@ -1,12 +1,17 @@
 import Input from '@/components/Input';
 import { MdContentCopy } from 'react-icons/md';
 import { useEffect, useState } from 'react';
+import { IoMdClose } from 'react-icons/io';
 
 interface CopyMeetingIdProps {
   meetingId: string;
+  onClose: () => void;
 }
 
-const CopyMeetingId: React.FC<CopyMeetingIdProps> = ({ meetingId }) => {
+const CopyMeetingId: React.FC<CopyMeetingIdProps> = ({
+  meetingId,
+  onClose,
+}) => {
   const [copyStatus, setCopyStatus] = useState('');
   const [showPopup, setShowPopup] = useState(false);
 
@@ -32,9 +37,15 @@ const CopyMeetingId: React.FC<CopyMeetingIdProps> = ({ meetingId }) => {
 
   return (
     <div
-      className={`absolute bottom-20 right-0 w-fit rounded-lg bg-white p-4 shadow-lg`}
+      className={`absolute bottom-20 right-0 rounded-lg bg-white p-5 shadow-lg`}
     >
-      <div className="relative flex flex-col gap-2">
+      <div className="relative flex flex-col gap-2 pt-3">
+        <div
+          onClick={onClose}
+          className="absolute -right-3 -top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-gray-200"
+        >
+          <IoMdClose size={20} color="#696969" />
+        </div>
         <div className=" text-gray-700">
           회의에 참여하기를 원하는 다른 사용자와 이 회의 ID를 공유하세요.
         </div>

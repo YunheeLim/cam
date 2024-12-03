@@ -804,7 +804,12 @@ const Meeting = () => {
                 <SettingIcon fill={'#ffffff'} />
               </Button>
             </div>
-            {isSettingOpen && <CopyMeetingId meetingId={mySessionId} />}
+            {isSettingOpen && (
+              <CopyMeetingId
+                onClose={() => setIsSettingOpen(false)}
+                meetingId={mySessionId}
+              />
+            )}
           </div>
         </div>
         {/* <BottomBar /> */}
