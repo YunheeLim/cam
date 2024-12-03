@@ -180,12 +180,8 @@ const Meeting = () => {
   };
 
   const [mySessionId, setMySessionId] = useState<string>('SessionA');
-  const [myUserName, setMyUserName] = useState<string>(
-    '참여자' + Math.floor(Math.random() * 100),
-  );
-
+  const [myUserName, setMyUserName] = useState<string>('');
   const [isNickNameSet, setIsNickNameSet] = useState(false);
-
   const [session, setSession] = useState<Session>();
   const [mainStreamManager, setMainStreamManager] = useState<StreamManager>();
   const [publisher, setPublisher] = useState<Publisher>();

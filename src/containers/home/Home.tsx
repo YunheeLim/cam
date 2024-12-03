@@ -7,8 +7,6 @@ import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
-// import getCaption from '@/lib/getSKCaption';
-import getCaption from '@/lib/getCaption';
 
 const Home = () => {
   const router = useRouter();
@@ -21,8 +19,9 @@ const Home = () => {
   const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
 
   useEffect(() => {
-    if (localStorage.getItem('shortcut') === 'true') {
+    if (window.localStorage.getItem('shortcut') === 'true') {
       setTempKeyBoard(true);
+      setIsKeyBoard(true);
     }
   }, []);
 
