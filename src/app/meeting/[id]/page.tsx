@@ -55,6 +55,7 @@ const Meeting = () => {
   const params = useParams();
   const searchParams = useSearchParams();
   const [isOcrOn, setIsOcrOn] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true); // 공유 화면 읽기 시 발화자 오디오 비활성화 유무
   const [numParticipants, setNumParticipants] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -159,6 +160,12 @@ const Meeting = () => {
     setIsParticipantsOpen(prev => !prev);
   };
 
+  // 스피커 클릭
+  const handleSpeakerClick = () => {
+    setIsSpeakerOn(prev => !prev);
+  };
+
+  // 셋팅 클릭
   const handleSettingClick = () => {
     setIsSettingOpen(prev => !prev);
   };
@@ -287,6 +294,64 @@ const Meeting = () => {
       deleteSubscriber(event.stream.streamManager);
     });
 
+    // 발화자 오디오 제거
+    // newSession.on('publisherStartSpeaking', event => {
+    //   subscribers.forEach(subscriber => {
+    //     subscriber.subscribeToAudio(false); // 자신만 들리지 않게 설정
+    //     console.log('Muted audio for everyone');
+    //   });
+    //   // const speakingStreamId = event.connection.connectionId;
+    //   // console.log(speakingStreamId);
+
+    //   // // 발화자에 해당하는 Subscriber의 오디오 끄기
+    //   // subscribers.forEach(subscriber => {
+    //   //   if (subscriber.stream.connection.connectionId === speakingStreamId) {
+    //   //     subscriber.subscribeToAudio(false); // 자신만 들리지 않게 설정
+    //   //     console.log('Muted audio for the speaker');
+    //   //   }
+    //   // });
+    // });
+
+    // 발화자 오디오 비활성화
+    newSession.on('publisherStartSpeaking', event => {
+      // 스피커 비활성화 상태일때만 실행
+      if (!isSpeakerOn) {
+        const speakingConnectionId = event.connection.connectionId;
+        console.log(speakingConnectionId);
+
+        subscribers.forEach(subscriber => {
+          if (subscriber) {
+            // 발화자의 connectionId와 구독자의 connectionId 비교
+            if (
+              subscriber.stream.connection.connectionId === speakingConnectionId
+            ) {
+              subscriber.subscribeToAudio(false); // 발화자 음소거
+              console.log('Muted audio for the speaker');
+            }
+          }
+        });
+      }
+    });
+
+    // 발화자 오디오 다시 활성화
+    newSession.on('publisherStopSpeaking', event => {
+      // 스피커 활성화 상태일때만 실행
+      if (isSpeakerOn) {
+        const speakingConnectionId = event.connection.connectionId;
+
+        subscribers.forEach(subscriber => {
+          if (subscriber) {
+            if (
+              subscriber.stream.connection.connectionId === speakingConnectionId
+            ) {
+              subscriber.subscribeToAudio(true); // 오디오 다시 활성화
+              console.log('Unmuted audio for the speaker');
+            }
+          }
+        });
+      }
+    });
+
     newSession.on('exception', exception => console.warn(exception));
 
     try {
@@ -294,8 +359,8 @@ const Meeting = () => {
       await newSession.connect(token, { clientData: myUserName });
 
       const newPublisher = await OV.current?.initPublisherAsync(undefined, {
-        audioSource: selectedAudioDeviceId,
-        videoSource: selectedVideoDeviceId,
+        audioSource: selectedAudioDeviceId || undefined,
+        videoSource: selectedVideoDeviceId || undefined,
         publishAudio: true,
         publishVideo: true,
         resolution: '640x480',
@@ -305,21 +370,12 @@ const Meeting = () => {
       });
       if (newPublisher) {
         newSession.publish(newPublisher);
-        const devices = await OV.current?.getDevices();
-        const videoDevices = devices?.filter(
-          device => device.kind === 'videoinput',
-        );
-        const currentVideoDeviceId = newPublisher.stream
-          .getMediaStream()
-          .getVideoTracks()[0]
-          .getSettings().deviceId;
 
-        console.log('device list:', videoDevices);
-        setVideoDeviceList(videoDeviceList);
-
-        const currentDevice = videoDevices?.find(
-          device => device.deviceId === currentVideoDeviceId,
-        );
+        // 오디오 감도 설정
+        newPublisher.updatePublisherSpeakingEventsOptions({
+          interval: 20, // 20ms 간격으로 감지
+          threshold: -80, // -80dB로 작은 소리도 감지
+        });
 
         setPublisher(newPublisher);
         // setMainStreamManager(newPublisher);
@@ -744,23 +800,17 @@ const Meeting = () => {
                 />
               )}
             </div>
-            {/* <Button
-            name="speaker"
-            onClick={handleOcrClick}
-            className="gap-2 px-2"
-          >
-            {isOcrOn ? (
-              <>
-                <SpeakerOn size={32} color="white" />{' '}
-                <div className="">공유화면 읽기</div>
-              </>
-            ) : (
-              <>
+            <Button
+              name="speaker"
+              onClick={handleSpeakerClick}
+              className="px-3"
+            >
+              {isSpeakerOn ? (
+                <SpeakerOn size={32} color="white" />
+              ) : (
                 <SpeakerOff size={32} color="white" />
-                <div className="">공유화면 읽기</div>
-              </>
-            )}
-          </Button> */}
+              )}
+            </Button>
             <Button
               onClick={handleCapture}
               disabled={!mainStreamManager} // 버튼 비활성화

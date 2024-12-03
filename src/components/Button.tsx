@@ -16,7 +16,9 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`flex h-12 w-full items-center justify-center rounded-lg bg-primary font-semibold text-white hover:bg-primary-hover ${className}`}
+      className={`flex h-12 items-center justify-center rounded-lg bg-primary font-semibold text-white hover:bg-primary-hover ${
+        className || ''
+      }`}
       {...props}
     >
       {children}
