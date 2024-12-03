@@ -11,7 +11,7 @@ export function TopBar() {
   return (
     <div
       className={`flex h-24 flex-row items-center justify-between px-8 ${
-        pathname.includes('/meeting') ? 'bg-black' : 'bg-white'
+        pathname.includes('/meeting') ? 'bg-black' : 'bg-[#ffffff]'
       } `}
     >
       <div onClick={() => router.push('/')} className="flex cursor-pointer">

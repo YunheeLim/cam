@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
+import encrypt from '@/lib/encrypt';
 
 const Home = () => {
   const router = useRouter();
@@ -27,10 +28,9 @@ const Home = () => {
 
   // 회의 생성
   const handleCreateMeeting = async () => {
-    // 회의 ID 생성 규칙: 회의 생성 날짜 + 랜덤숫자
-    const createdId =
-      currentTime.getTime() + Math.floor(Math.random() * 100000);
-    router.push(`preview/${createdId}?type=new`);
+    // 회의 ID 생성 후 암호화
+    const meetingId = encrypt();
+    router.push(`preview/${meetingId}?type=new`);
   };
 
   // 회의 생성 단축키: 1

@@ -13,8 +13,8 @@ const MeetingButton: React.FC<MeetingButton> = ({ children, onClick }) => {
       <button
         className={`flex h-28 w-36 items-center justify-center rounded-3xl ${
           children === '새 회의'
-            ? 'hover:bg-primary-hover bg-primary'
-            : `border border-primary bg-white hover:bg-[#F0F0F0]`
+            ? 'bg-primary hover:bg-primary-hover'
+            : `hover:bg-white-hover border border-primary bg-white`
         }`}
       >
         {children === '새 회의' ? <CameraIcon /> : <PlusIcon />}

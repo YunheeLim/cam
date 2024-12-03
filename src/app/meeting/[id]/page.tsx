@@ -30,6 +30,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
 import ExitModal from '@/containers/meeting/ExitModal';
 import ParticipantsModal from '@/containers/meeting/ParticipantsModal';
+import CopyMeetingId from '@/containers/meeting/CopyMeetingId';
 
 declare global {
   interface ImageCapture {
@@ -89,6 +90,7 @@ const Meeting = () => {
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
   const [isReading, setIsReading] = useState(false); // ocr 텍스트 리딩 상태
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false); // 참여자 리스트 모달
+  const [isSettingOpen, setIsSettingOpen] = useState(false); // 셋팅 모달
 
   // 단축키 설정 정보
   useEffect(() => {
@@ -155,6 +157,10 @@ const Meeting = () => {
   // 참여자 클릭
   const handleParticipantsClick = () => {
     setIsParticipantsOpen(prev => !prev);
+  };
+
+  const handleSettingClick = () => {
+    setIsSettingOpen(prev => !prev);
   };
 
   // 모달창 외부 클릭 시 모달 닫힘
@@ -793,9 +799,12 @@ const Meeting = () => {
                 />
               )}
             </div>
-            <Button className="p-2">
-              <SettingIcon fill={'#ffffff'} />
-            </Button>
+            <div className="relative">
+              <Button onClick={handleSettingClick} className="p-2">
+                <SettingIcon fill={'#ffffff'} />
+              </Button>
+            </div>
+            {isSettingOpen && <CopyMeetingId meetingId={mySessionId} />}
           </div>
         </div>
         {/* <BottomBar /> */}
