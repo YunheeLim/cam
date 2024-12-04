@@ -44,6 +44,11 @@ declare global {
     new (videoTrack: MediaStreamTrack): ImageCapture;
   };
 }
+
+interface ExtendedStreamManager extends StreamManager {
+  subscribeToAudio: (value: boolean) => void;
+}
+
 // OpenVidu global variables
 
 let sessionScreen: Session;
@@ -65,7 +70,7 @@ const Meeting = () => {
     if (isSpeakerOnRef.current && subscribersRef.current.length) {
       subscribersRef.current.forEach(subscriber => {
         console.log(subscriber);
-        subscriber.subscribeToAudio(true); // 발화자 음소거
+        (subscriber as ExtendedStreamManager).subscribeToAudio(true);
         console.log('Unmuted audio for the speaker');
       });
     }
@@ -96,7 +101,7 @@ const Meeting = () => {
   const [prevAudioDeviceId, setPrevAudioDeviceId] = useState<string>('');
   const [isNewStream, setIsNewStream] = useState(false); // 기기 변경으로 인한 새 스트림 생성 여부
 
-  const [capturedImage, setCapturedImage] = useState<string | null>(null); // 캡쳐 이미지
+  const [capturedImage, setCapturedImage] = useState<string | undefined>(''); // 캡쳐 이미지
   const canvasRef = useRef<HTMLCanvasElement>(null); // 프레임 변화 감지를 위한 canvas
   const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
   const intervalIdRef = useRef<number | null>(null);
@@ -325,7 +330,7 @@ const Meeting = () => {
           if (
             subscriber.stream.connection.connectionId === speakingConnectionId
           ) {
-            subscriber.subscribeToAudio(false); // 발화자 음소거
+            (subscriber as ExtendedStreamManager).subscribeToAudio(false);
             console.log('Muted audio for the speaker');
           }
         });
@@ -496,7 +501,7 @@ const Meeting = () => {
     setSubscribers([]);
     setMySessionId('SessionA');
     setMyUserName('참여자' + Math.floor(Math.random() * 100));
-    setMainStreamManager(null);
+    setMainStreamManager(undefined);
 
     setPublisher(undefined);
     setScreenPublisher(undefined);
@@ -631,7 +636,7 @@ const Meeting = () => {
         setIsReading(true);
         const textData = await getText(mainStreamManager);
         if (typeof textData === 'string') {
-          getText(textData);
+          // getText(textData);
           getSpeechForOne(textData);
         }
         console.log('text in handlecapture', textData);
