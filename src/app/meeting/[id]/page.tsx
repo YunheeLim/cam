@@ -590,37 +590,6 @@ const Meeting = () => {
 
       let imageCapture = new ImageCapture(track);
 
-      // 딱 한 번만 실행되는 초기화 로직
-      if (!prevFrameData.current) {
-        try {
-          let bitmap = await imageCapture.grabFrame();
-          canvas.width = bitmap.width;
-          canvas.height = bitmap.height;
-          context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-
-          let currentFrameData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
-          console.log('Screen content initialized');
-
-          // const textData = await getText(mainStreamManager);
-          // if (typeof textData === 'string') {
-          //   getSpeechForOne(textData);
-
-          prevFrameData.current = currentFrameData; // 초기화된 프레임 저장
-          isInitialized.current = true; // 초기화 완료 플래그 설정
-          // }
-          // console.log('text in handlecapture', textData);
-          setIsLoading(false);
-        } catch (error) {
-          console.error('Error during initialization:', error);
-          setIsLoading(false);
-        }
-      }
-
       const checkFrame = async () => {
         try {
           const bitmap = await imageCapture.grabFrame();
@@ -636,10 +605,9 @@ const Meeting = () => {
           );
 
           if (
-            prevFrameData.current &&
+            !prevFrameData.current ||
             hasFrameChanged(prevFrameData.current, currentFrameData)
           ) {
-            console.log(prevFrameData.current, currentFrameData);
             if (!changeDetected.current) {
               window.speechSynthesis.cancel();
 
@@ -651,41 +619,42 @@ const Meeting = () => {
                 getSpeechForOne(textData);
               }
               console.log('text in handlecapture', textData);
+              setIsLoading(false);
             }
           } else {
             // Reset the flag if no change is detected
             changeDetected.current = false;
+            setIsLoading(false);
           }
 
           prevFrameData.current = currentFrameData;
-          setIsLoading(false);
         } catch (error) {
           console.error('Error capturing frame:', error);
           setIsLoading(false);
         }
       };
 
-      if (prevFrameData.current) {
-        intervalIdRef.current = window.setInterval(checkFrame, 3000); // 1-second interval
-      }
+      intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
     }
   };
 
-  const hasFrameChanged = (prev: ImageData, current: ImageData) => {
-    const threshold = 10000; // Define a difference threshold
+  const hasFrameChanged = (prev: ImageData | null, current: ImageData) => {
+    if (!prev) return false;
+    const threshold = 50000; // Define a difference threshold
     let diffCount = 0;
+    const length = prev.data.length;
 
-    for (let i = 0; i < prev.data.length; i += 4) {
+    // Step size를 늘려서 모든 픽셀을 비교하지 않음
+    for (let i = 0; i < length; i += 16) {
+      // 매 4픽셀(4 * 4 = 16 바이트)마다 비교
       const rDiff = Math.abs(prev.data[i] - current.data[i]);
       const gDiff = Math.abs(prev.data[i + 1] - current.data[i + 1]);
       const bDiff = Math.abs(prev.data[i + 2] - current.data[i + 2]);
 
       if (rDiff + gDiff + bDiff > 50) {
-        // If color difference is significant
         diffCount++;
+        if (diffCount > threshold) return true; // 조기 종료
       }
-
-      if (diffCount > threshold) return true; // If enough pixels have changed
     }
 
     return false;
