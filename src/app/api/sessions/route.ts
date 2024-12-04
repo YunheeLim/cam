@@ -46,11 +46,24 @@ const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET || 'MY_SECRET';
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
 export async function POST(req: NextRequest) {
-  const requestBody = await req.json();
-  const { customSessionId } = requestBody;
+  try {
+    const requestBody = await req.json();
+    var session = await openvidu.createSession(requestBody);
+    return NextResponse.json(
+      {
+        result: 'success',
+        sessionId: session.sessionId,
+      },
+      { status: 200 },
+    );
+  } catch (err) {
+    console.error(err);
 
-  return NextResponse.json({
-    result: 'success',
-    data: customSessionId,
-  });
+    return NextResponse.json(
+      {
+        result: 'failed',
+      },
+      { status: 500 },
+    );
+  }
 }

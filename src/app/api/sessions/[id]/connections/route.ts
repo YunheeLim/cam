@@ -50,9 +50,11 @@ export async function POST(
   { params }: { params: { sessionId: string } },
 ) {
   const { sessionId } = params;
-
-  return NextResponse.json({
-    result: 'success',
-    sessionId: sessionId,
-  });
+  return NextResponse.json(
+    {
+      result: 'success',
+      sessionId: sessionId,
+    },
+    { status: 200 },
+  );
 }
