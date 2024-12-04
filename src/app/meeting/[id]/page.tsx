@@ -296,6 +296,9 @@ const Meeting = () => {
 
     newSession.on('streamDestroyed', event => {
       deleteSubscriber(event.stream.streamManager);
+      if (event.stream.streamManager.stream.typeOfVideo === 'SCREEN') {
+        setMainStreamManager(undefined);
+      }
     });
 
     // 발화자 오디오 비활성화
