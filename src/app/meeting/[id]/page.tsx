@@ -496,29 +496,31 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
-  const APPLICATION_SERVER_URL = '/api/signaling/';
+  const APPLICATION_SERVER_URL = '';
+  // const APPLICATION_SERVER_URL = 'http://localhost:5000';
 
   const createSession = async (sessionId: string) => {
     const response = await axios.post(
-      `/api/sessions`,
+      `${APPLICATION_SERVER_URL}/api/test`,
       { customSessionId: sessionId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('asdfasdf', response.data);
-    return response.data;
+    console.log('세션아이디:', response.data.sessionId);
+    return response.data.sessionId;
   };
 
   const createToken = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions/${sessionId}/connections`,
+      `${APPLICATION_SERVER_URL}/api/test?sessionId=${sessionId}`,
       {},
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    return response.data;
+    console.log('토큰:', response.data.token);
+    return response.data.token;
   };
 
   // 공유 화면 읽기 (버튼 누를 때만 한시적으로)
