@@ -539,8 +539,8 @@ const Meeting = () => {
     }
   };
 
-  let changeDetected = false;
-  let isInitialized = false; // 처음 실행 시 상태 관리
+  const isInitialized = useRef(false); // Use useRef for isInitialized
+  const changeDetected = useRef(false); // Use useRef for changeDetected
 
   // 프레임 변화 시 자동 감지 되는 ocr
   const handleTest = async () => {
@@ -588,33 +588,32 @@ const Meeting = () => {
         ?.getVideoTracks()[0];
       if (!track) return;
 
-      const imageCapture = new ImageCapture(track);
+      let imageCapture = new ImageCapture(track);
 
       // 딱 한 번만 실행되는 초기화 로직
-      if (!isInitialized) {
+      if (!prevFrameData.current) {
         try {
-          const bitmap = await imageCapture.grabFrame();
+          let bitmap = await imageCapture.grabFrame();
           canvas.width = bitmap.width;
           canvas.height = bitmap.height;
           context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
 
-          const currentFrameData = context.getImageData(
+          let currentFrameData = context.getImageData(
             0,
             0,
             canvas.width,
             canvas.height,
           );
-
           console.log('Screen content initialized');
 
-          const textData = await getText(mainStreamManager);
-          if (typeof textData === 'string') {
-            getSpeechForOne(textData);
+          // const textData = await getText(mainStreamManager);
+          // if (typeof textData === 'string') {
+          //   getSpeechForOne(textData);
 
-            prevFrameData.current = currentFrameData; // 초기화된 프레임 저장
-            isInitialized = true; // 초기화 완료 플래그 설정
-          }
-          console.log('text in handlecapture', textData);
+          prevFrameData.current = currentFrameData; // 초기화된 프레임 저장
+          isInitialized.current = true; // 초기화 완료 플래그 설정
+          // }
+          // console.log('text in handlecapture', textData);
           setIsLoading(false);
         } catch (error) {
           console.error('Error during initialization:', error);
@@ -640,11 +639,12 @@ const Meeting = () => {
             prevFrameData.current &&
             hasFrameChanged(prevFrameData.current, currentFrameData)
           ) {
-            if (!changeDetected) {
+            console.log(prevFrameData.current, currentFrameData);
+            if (!changeDetected.current) {
               window.speechSynthesis.cancel();
 
               console.log('Screen content changed');
-              changeDetected = true;
+              changeDetected.current = true;
 
               const textData = await getText(mainStreamManager);
               if (typeof textData === 'string') {
@@ -654,7 +654,7 @@ const Meeting = () => {
             }
           } else {
             // Reset the flag if no change is detected
-            changeDetected = false;
+            changeDetected.current = false;
           }
 
           prevFrameData.current = currentFrameData;
@@ -665,10 +665,8 @@ const Meeting = () => {
         }
       };
 
-      if (prevFrameData.current && isInitialized) {
-        // 중복 실행 방지
-        console.log('이제시작');
-        // intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
+      if (prevFrameData.current) {
+        intervalIdRef.current = window.setInterval(checkFrame, 3000); // 1-second interval
       }
     }
   };
