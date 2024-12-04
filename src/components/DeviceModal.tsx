@@ -42,7 +42,7 @@ const DeviceModal: React.FC<DeviceModalProps> = ({
     <div
       className={`absolute left-0 ${
         page === 'meeting' ? 'bottom-14' : 'top-14'
-      }  z-10 w-fit overflow-hidden rounded-lg bg-white shadow-lg`}
+      }  shadow-custom-all z-10 w-fit overflow-hidden rounded-lg bg-white`}
     >
       {list?.map((item: ItemProps) => (
         <div

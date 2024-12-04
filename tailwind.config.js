@@ -48,6 +48,10 @@ module.exports = {
         '2/10': '20%',
         '16by9': '23%', // 16:9 aspect ratio (9 / 16 * 100)
       },
+      boxShadow: {
+        'custom-all':
+          '0 4px 6px rgba(0, 0, 0, 0.05), 0 -4px 6px rgba(0, 0, 0, 0.05), 4px 0 6px rgba(0, 0, 0, 0.05), -4px 0 6px rgba(0, 0, 0, 0.05)',
+      },
     },
   },
   plugins: [require('@tailwindcss/aspect-ratio')],
