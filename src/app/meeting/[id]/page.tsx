@@ -54,7 +54,7 @@ interface ExtendedStreamManager extends StreamManager {
 
 // let sessionScreen: Session;
 
-const APPLICATION_SERVER_URL = 'http://localhost:5000/';
+// const APPLICATION_SERVER_URL = 'http://localhost:5000/';
 
 const Meeting = () => {
   const router = useRouter();
@@ -496,14 +496,17 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
+  const APPLICATION_SERVER_URL = '/api/signaling/';
+
   const createSession = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions`,
+      `/api/sessions`,
       { customSessionId: sessionId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
+    console.log('asdfasdf', response.data);
     return response.data;
   };
 
