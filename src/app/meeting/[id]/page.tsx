@@ -539,20 +539,21 @@ const Meeting = () => {
     }
   };
 
-  const isInitialized = useRef(false); // Use useRef for isInitialized
-  const changeDetected = useRef(false); // Use useRef for changeDetected
+  const stop = useRef(true); // 읽기 중단했을 때
+  const changeDetected = useRef(false); // 프레임 변화 여부
 
   // 프레임 변화 시 자동 감지 되는 ocr
   const handleTest = async () => {
     if (!mainStreamManager) return;
 
     if (isOcrOn) {
+      stop.current = true;
+
       setIsOcrOn(false);
       prevFrameData.current = null;
-
-      setIsReading(false);
       window.speechSynthesis.cancel();
-
+      changeDetected.current = false; // Use useRef for changeDetected
+      setIsReading(false);
       // Cleanup requestAnimationFrame on component unmount
       if (intervalIdRef.current) {
         console.log('========cleanup 1=========');
@@ -560,6 +561,8 @@ const Meeting = () => {
         intervalIdRef.current = null; // Clear the interval ID
       }
     } else {
+      stop.current = false;
+
       setIsOcrOn(true);
       detectChanges();
     }
@@ -567,6 +570,8 @@ const Meeting = () => {
 
   // 공유 화면 읽기 (자동으로)
   const detectChanges = async () => {
+    if (stop.current) return;
+
     setIsLoading(true);
     console.log('detect change called');
 
@@ -577,6 +582,9 @@ const Meeting = () => {
       window.speechSynthesis.cancel();
       // 읽는 중일 때 멈추기
     } else {
+      if (stop.current) {
+        return;
+      }
       setIsReading(true);
 
       const canvas = canvasRef.current;
@@ -591,6 +599,9 @@ const Meeting = () => {
       let imageCapture = new ImageCapture(track);
 
       const checkFrame = async () => {
+        if (stop.current) {
+          return;
+        }
         try {
           const bitmap = await imageCapture.grabFrame();
           canvas.width = bitmap.width;
@@ -605,8 +616,9 @@ const Meeting = () => {
           );
 
           if (
-            !prevFrameData.current ||
-            hasFrameChanged(prevFrameData.current, currentFrameData)
+            !stop.current &&
+            (!prevFrameData.current ||
+              hasFrameChanged(prevFrameData.current, currentFrameData))
           ) {
             if (!changeDetected.current) {
               window.speechSynthesis.cancel();
@@ -633,8 +645,9 @@ const Meeting = () => {
           setIsLoading(false);
         }
       };
-
-      intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
+      if (!stop.current) {
+        intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
+      }
     }
   };
 
@@ -846,7 +859,7 @@ const Meeting = () => {
               }`}
             >
               <RiSpeakLine size={32} />
-              {isReading ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
+              {isOcrOn ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
             </Button>
           </div>
           <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">
