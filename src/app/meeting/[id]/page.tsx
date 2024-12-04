@@ -357,6 +357,10 @@ const Meeting = () => {
           threshold: -80, // -80dB로 작은 소리도 감지
         });
 
+        // 미리보기에서 비디오/오디오 mute/unmute 여부
+        newPublisher.publishVideo(isCameraOn);
+        newPublisher.publishAudio(isMicOn);
+
         setPublisher(newPublisher);
         // setMainStreamManager(newPublisher);
         setSession(newSession);
