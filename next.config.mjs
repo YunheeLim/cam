@@ -7,6 +7,11 @@ const nextConfig = {
       use: ['@svgr/webpack'],
     });
 
+    config.module.rules.push({
+      test: /\.(gif|png|jpe?g|bmp|webp)$/,
+      type: 'asset/resource',
+    });
+
     return config;
   },
   async rewrites() {

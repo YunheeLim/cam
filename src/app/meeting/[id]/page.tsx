@@ -31,6 +31,7 @@ import DeviceModal from '@/components/DeviceModal';
 import ExitModal from '@/containers/meeting/ExitModal';
 import ParticipantsModal from '@/containers/meeting/ParticipantsModal';
 import CopyMeetingId from '@/containers/meeting/CopyMeetingId';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 declare global {
   interface ImageCapture {
@@ -59,6 +60,8 @@ const Meeting = () => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+
+  const [isLoading, setIsLoading] = useState(false);
   const [isOcrOn, setIsOcrOn] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true); // 공유 화면 읽기 시 발화자 오디오 비활성화 유무
   const isSpeakerOnRef = useRef<boolean>(true); // 구독자 참조
@@ -103,7 +106,9 @@ const Meeting = () => {
 
   const [capturedImage, setCapturedImage] = useState<string | undefined>(''); // 캡쳐 이미지
   const canvasRef = useRef<HTMLCanvasElement>(null); // 프레임 변화 감지를 위한 canvas
+
   const prevFrameData = useRef<ImageData | null>(null); // 변화 이전 프레임
+
   const intervalIdRef = useRef<number | null>(null);
   const sharedScreenRef = useRef<HTMLDivElement>(null);
 
@@ -196,27 +201,6 @@ const Meeting = () => {
       setIsVideoListOpen(false);
       setIsAudioListOpen(false);
       setIsParticipantsOpen(false);
-    }
-  };
-
-  // 프레임 변화 시 자동 감지 되는 ocr
-  const handleOcrClick = async () => {
-    if (mainStreamManager) {
-      if (isOcrOn) {
-        setIsOcrOn(false);
-
-        prevFrameData.current = null;
-
-        // Cleanup requestAnimationFrame on component unmount
-        if (intervalIdRef.current) {
-          console.log('========cleanup 1=========');
-          clearInterval(intervalIdRef.current);
-          intervalIdRef.current = null; // Clear the interval ID
-        }
-      } else {
-        setIsOcrOn(true);
-        detectChanges();
-      }
     }
   };
 
@@ -320,9 +304,9 @@ const Meeting = () => {
     // 발화자 오디오 비활성화
     newSession.on('publisherStartSpeaking', event => {
       const speakingConnectionId = event.connection.connectionId;
-      console.log(speakingConnectionId);
-      console.log(subscribersRef.current); // 항상 최신 값
-      console.log('isSpeakerOn:', isSpeakerOnRef.current);
+      // console.log(speakingConnectionId);
+      // console.log(subscribersRef.current); // 항상 최신 값
+      // console.log('isSpeakerOn:', isSpeakerOnRef.current);
 
       if (!isSpeakerOnRef.current && subscribersRef.current.length) {
         subscribersRef.current.forEach(subscriber => {
@@ -467,7 +451,6 @@ const Meeting = () => {
             setScreenSession(sessionScreen);
             setScreenPublisher(publisher);
             setScreenSharing(true);
-            detectChanges(); // 공유된 화면의 프레임 변화 감지
           });
 
           publisher?.once('accessDenied', event => {
@@ -536,51 +519,158 @@ const Meeting = () => {
     return response.data;
   };
 
+  // 공유 화면 읽기 (버튼 누를 때만 한시적으로)
+  const handleCapture = async () => {
+    if (mainStreamManager && isReading) {
+      setIsReading(false);
+      window.speechSynthesis.cancel();
+      // 읽는 중일 때 멈추기
+    } else {
+      // 읽기 시작
+      if (mainStreamManager) {
+        setIsReading(true);
+        const textData = await getText(mainStreamManager);
+        if (typeof textData === 'string') {
+          // getText(textData);
+          getSpeechForOne(textData);
+        }
+        console.log('text in handlecapture', textData);
+      }
+    }
+  };
+
+  let changeDetected = false;
+  let isInitialized = false; // 처음 실행 시 상태 관리
+
+  // 프레임 변화 시 자동 감지 되는 ocr
+  const handleTest = async () => {
+    if (!mainStreamManager) return;
+
+    if (isOcrOn) {
+      setIsOcrOn(false);
+      prevFrameData.current = null;
+
+      setIsReading(false);
+      window.speechSynthesis.cancel();
+
+      // Cleanup requestAnimationFrame on component unmount
+      if (intervalIdRef.current) {
+        console.log('========cleanup 1=========');
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null; // Clear the interval ID
+      }
+    } else {
+      setIsOcrOn(true);
+      detectChanges();
+    }
+  };
+
+  // 공유 화면 읽기 (자동으로)
   const detectChanges = async () => {
+    setIsLoading(true);
     console.log('detect change called');
+
     if (!canvasRef.current || !mainStreamManager) return;
 
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    if (!context) return;
+    if (isReading) {
+      setIsReading(false);
+      window.speechSynthesis.cancel();
+      // 읽는 중일 때 멈추기
+    } else {
+      setIsReading(true);
 
-    const track = mainStreamManager?.stream
-      ?.getMediaStream()
-      ?.getVideoTracks()[0];
-    if (!track) return;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      if (!context) return;
 
-    const imageCapture = new ImageCapture(track);
+      const track = mainStreamManager?.stream
+        ?.getMediaStream()
+        ?.getVideoTracks()[0];
+      if (!track) return;
 
-    const checkFrame = async () => {
-      try {
-        const bitmap = await imageCapture.grabFrame();
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
-        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+      const imageCapture = new ImageCapture(track);
 
-        const currentFrameData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-        );
-        if (
-          prevFrameData.current &&
-          hasFrameChanged(prevFrameData.current, currentFrameData)
-        ) {
-          console.log('Screen content changed, capturing...');
-          const capturedBlob = canvas.toDataURL('image/png');
-          setCapturedImage(capturedBlob);
-          console.log(capturedBlob);
+      // 딱 한 번만 실행되는 초기화 로직
+      if (!isInitialized) {
+        try {
+          const bitmap = await imageCapture.grabFrame();
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+
+          const currentFrameData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+          );
+
+          console.log('Screen content initialized');
+
+          const textData = await getText(mainStreamManager);
+          if (typeof textData === 'string') {
+            getSpeechForOne(textData);
+
+            prevFrameData.current = currentFrameData; // 초기화된 프레임 저장
+            isInitialized = true; // 초기화 완료 플래그 설정
+          }
+          console.log('text in handlecapture', textData);
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error during initialization:', error);
+          setIsLoading(false);
         }
-
-        prevFrameData.current = currentFrameData;
-      } catch (error) {
-        console.error('Error capturing frame:', error);
       }
-    };
 
-    intervalIdRef.current = window.setInterval(checkFrame, 3000); // 1-second interval
+      const checkFrame = async () => {
+        try {
+          const bitmap = await imageCapture.grabFrame();
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+
+          const currentFrameData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+          );
+
+          if (
+            prevFrameData.current &&
+            hasFrameChanged(prevFrameData.current, currentFrameData)
+          ) {
+            if (!changeDetected) {
+              window.speechSynthesis.cancel();
+
+              console.log('Screen content changed');
+              changeDetected = true;
+
+              const textData = await getText(mainStreamManager);
+              if (typeof textData === 'string') {
+                getSpeechForOne(textData);
+              }
+              console.log('text in handlecapture', textData);
+            }
+          } else {
+            // Reset the flag if no change is detected
+            changeDetected = false;
+          }
+
+          prevFrameData.current = currentFrameData;
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error capturing frame:', error);
+          setIsLoading(false);
+        }
+      };
+
+      if (prevFrameData.current && isInitialized) {
+        // 중복 실행 방지
+        console.log('이제시작');
+        // intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
+      }
+    }
   };
 
   const hasFrameChanged = (prev: ImageData, current: ImageData) => {
@@ -624,26 +714,6 @@ const Meeting = () => {
     };
   }, [text]);
 
-  // 공유 화면 캡쳐
-  const handleCapture = async () => {
-    if (mainStreamManager && isReading) {
-      setIsReading(false);
-      window.speechSynthesis.cancel();
-      // 읽는 중일 때 멈추기
-    } else {
-      // 읽기 시작
-      if (mainStreamManager) {
-        setIsReading(true);
-        const textData = await getText(mainStreamManager);
-        if (typeof textData === 'string') {
-          // getText(textData);
-          getSpeechForOne(textData);
-        }
-        console.log('text in handlecapture', textData);
-      }
-    }
-  };
-
   // 화면 캡쳐 및 ocr 단축키
   useHotkeys('ctrl+o', handleCapture, { enabled: isShortcut });
 
@@ -669,6 +739,7 @@ const Meeting = () => {
   return (
     <>
       {isModalOpen && <ExitModal onOk={leaveSession} onClose={closeModal} />}
+      {<LoadingIndicator />}
       <div
         onClick={handleBackgroundClick}
         className="flex h-full w-full flex-col justify-center bg-black"
@@ -801,7 +872,7 @@ const Meeting = () => {
               )}
             </Button>
             <Button
-              onClick={handleCapture}
+              onClick={handleTest}
               disabled={!mainStreamManager} // 버튼 비활성화
               className={`gap-2 px-4 ${
                 mainStreamManager ? '' : '!text-gray-400 hover:!bg-primary'

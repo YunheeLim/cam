@@ -52,6 +52,9 @@ module.exports = {
         'custom-all':
           '0 4px 6px rgba(0, 0, 0, 0.05), 0 -4px 6px rgba(0, 0, 0, 0.05), 4px 0 6px rgba(0, 0, 0, 0.05), -4px 0 6px rgba(0, 0, 0, 0.05)',
       },
+      animation: {
+        spinSlow: 'spin 2s linear infinite', // 3초로 회전 속도 조정
+      },
     },
   },
   plugins: [require('@tailwindcss/aspect-ratio')],

@@ -70,17 +70,17 @@ const getText = async (mainStreamManager: StreamManager) => {
           // window.open(url, '_blank');
 
           // caption api
-          try {
-            const captionResult = await getCaption(base64Data);
-            const formattedCaption = captionResult?.content;
-            console.log('formatted Caption Result:', formattedCaption);
+          // try {
+          //   const captionResult = await getCaption(base64Data);
+          //   const formattedCaption = captionResult?.content;
+          //   console.log('formatted Caption Result:', formattedCaption);
 
-            if (formattedCaption !== 'Failed') {
-              returnText += formattedCaption;
-            }
-          } catch (error) {
-            console.error('Failed to get Caption Text', error);
-          }
+          //   if (formattedCaption !== 'Failed') {
+          //     returnText += formattedCaption;
+          //   }
+          // } catch (error) {
+          //   console.error('Failed to get Caption Text', error);
+          // }
 
           // ocr api
           try {
