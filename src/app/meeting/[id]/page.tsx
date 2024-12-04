@@ -18,8 +18,8 @@ import PeopleIcon from '../../../../public/svgs/people.svg';
 import ExitIcon from '../../../../public/svgs/exit.svg';
 import Video from '@/components/Video';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import UserVideoComponent from './UserVideoComponent';
-import OpenViduVideoComponent from './OvVideo';
+import UserVideoComponent from '../../../containers/meeting/UserVideoComponent';
+import OpenViduVideoComponent from '../../../containers/meeting/OvVideo';
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
@@ -52,9 +52,9 @@ interface ExtendedStreamManager extends StreamManager {
 
 // OpenVidu global variables
 
-let sessionScreen: Session;
+// let sessionScreen: Session;
 
-const APPLICATION_SERVER_URL = 'http://localhost:5000/';
+// const APPLICATION_SERVER_URL = 'http://localhost:5000/';
 
 const Meeting = () => {
   const router = useRouter();
@@ -204,21 +204,18 @@ const Meeting = () => {
     }
   };
 
-  const [mySessionId, setMySessionId] = useState<string>('SessionA');
+  const [mySessionId, setMySessionId] = useState<string>('');
   const [myUserName, setMyUserName] = useState<string>('');
   const [isNickNameSet, setIsNickNameSet] = useState(false);
   const [session, setSession] = useState<Session>();
-  const [mainStreamManager, setMainStreamManager] = useState<StreamManager>();
+  const [mainStreamManager, setMainStreamManager] = useState<
+    StreamManager | undefined
+  >(undefined);
   const [publisher, setPublisher] = useState<Publisher>();
   const [subscribers, setSubscribers] = useState<StreamManager[]>([]);
   const subscribersRef = useRef<StreamManager[]>([]); // 구독자 참조
   const [screenSession, setScreenSession] = useState<Session>();
   const [screenPublisher, setScreenPublisher] = useState<Publisher>();
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [videoDeviceList, setVideoDeviceList] = useState([]);
-  const [audioDeviceList, setAudioDeviceList] = useState([]);
-  const [currentVideoDevice, setCurrentVideoDevice] =
-    useState<MediaDeviceInfo>();
 
   const OV = useRef<OpenVidu>();
   const OVScreen = useRef<OpenVidu>();
@@ -228,7 +225,7 @@ const Meeting = () => {
     window.addEventListener('beforeunload', onBeforeUnload);
 
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [session]);
+  }, [session, screenSession]);
 
   const handleMainVideoStream = (stream: StreamManager) => {
     if (mainStreamManager !== stream) setMainStreamManager(stream);
@@ -299,6 +296,9 @@ const Meeting = () => {
 
     newSession.on('streamDestroyed', event => {
       deleteSubscriber(event.stream.streamManager);
+      if (event.stream.streamManager.stream.typeOfVideo === 'SCREEN') {
+        setMainStreamManager(undefined);
+      }
     });
 
     // 발화자 오디오 비활성화
@@ -353,7 +353,6 @@ const Meeting = () => {
         setPublisher(newPublisher);
         // setMainStreamManager(newPublisher);
         setSession(newSession);
-        setScreenSharing(false);
       }
     } catch (error) {
       console.log('Error connecting to the session:', error);
@@ -446,11 +445,11 @@ const Meeting = () => {
               .addEventListener('ended', () => {
                 console.log('User pressed the "Stop sharing" button');
                 sessionScreen.unpublish(publisher);
+                setMainStreamManager(undefined);
               });
             sessionScreen.publish(publisher);
             setScreenSession(sessionScreen);
             setScreenPublisher(publisher);
-            setScreenSharing(true);
           });
 
           publisher?.once('accessDenied', event => {
@@ -473,7 +472,7 @@ const Meeting = () => {
     }
 
     session?.disconnect();
-    sessionScreen?.disconnect();
+    screenSession?.disconnect();
 
     OV.current = undefined;
     OVScreen.current = undefined;
@@ -497,26 +496,31 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
+  const APPLICATION_SERVER_URL = '';
+  // const APPLICATION_SERVER_URL = 'http://localhost:5000';
+
   const createSession = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions`,
+      `${APPLICATION_SERVER_URL}/api/signaling`,
       { customSessionId: sessionId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    return response.data;
+    console.log('세션아이디:', response.data.sessionId);
+    return response.data.sessionId;
   };
 
   const createToken = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions/${sessionId}/connections`,
+      `${APPLICATION_SERVER_URL}/api/signaling?sessionId=${sessionId}`,
       {},
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    return response.data;
+    console.log('토큰:', response.data.token);
+    return response.data.token;
   };
 
   // 공유 화면 읽기 (버튼 누를 때만 한시적으로)
@@ -539,20 +543,21 @@ const Meeting = () => {
     }
   };
 
-  let changeDetected = false;
-  let isInitialized = false; // 처음 실행 시 상태 관리
+  const stop = useRef(true); // 읽기 중단했을 때
+  const changeDetected = useRef(false); // 프레임 변화 여부
 
   // 프레임 변화 시 자동 감지 되는 ocr
   const handleTest = async () => {
     if (!mainStreamManager) return;
 
     if (isOcrOn) {
+      stop.current = true;
+
       setIsOcrOn(false);
       prevFrameData.current = null;
-
-      setIsReading(false);
       window.speechSynthesis.cancel();
-
+      changeDetected.current = false; // Use useRef for changeDetected
+      setIsReading(false);
       // Cleanup requestAnimationFrame on component unmount
       if (intervalIdRef.current) {
         console.log('========cleanup 1=========');
@@ -560,6 +565,8 @@ const Meeting = () => {
         intervalIdRef.current = null; // Clear the interval ID
       }
     } else {
+      stop.current = false;
+
       setIsOcrOn(true);
       detectChanges();
     }
@@ -567,6 +574,8 @@ const Meeting = () => {
 
   // 공유 화면 읽기 (자동으로)
   const detectChanges = async () => {
+    if (stop.current) return;
+
     setIsLoading(true);
     console.log('detect change called');
 
@@ -577,6 +586,9 @@ const Meeting = () => {
       window.speechSynthesis.cancel();
       // 읽는 중일 때 멈추기
     } else {
+      if (stop.current) {
+        return;
+      }
       setIsReading(true);
 
       const canvas = canvasRef.current;
@@ -588,41 +600,12 @@ const Meeting = () => {
         ?.getVideoTracks()[0];
       if (!track) return;
 
-      const imageCapture = new ImageCapture(track);
-
-      // 딱 한 번만 실행되는 초기화 로직
-      if (!isInitialized) {
-        try {
-          const bitmap = await imageCapture.grabFrame();
-          canvas.width = bitmap.width;
-          canvas.height = bitmap.height;
-          context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-
-          const currentFrameData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height,
-          );
-
-          console.log('Screen content initialized');
-
-          const textData = await getText(mainStreamManager);
-          if (typeof textData === 'string') {
-            getSpeechForOne(textData);
-
-            prevFrameData.current = currentFrameData; // 초기화된 프레임 저장
-            isInitialized = true; // 초기화 완료 플래그 설정
-          }
-          console.log('text in handlecapture', textData);
-          setIsLoading(false);
-        } catch (error) {
-          console.error('Error during initialization:', error);
-          setIsLoading(false);
-        }
-      }
+      let imageCapture = new ImageCapture(track);
 
       const checkFrame = async () => {
+        if (stop.current) {
+          return;
+        }
         try {
           const bitmap = await imageCapture.grabFrame();
           canvas.width = bitmap.width;
@@ -637,57 +620,58 @@ const Meeting = () => {
           );
 
           if (
-            prevFrameData.current &&
-            hasFrameChanged(prevFrameData.current, currentFrameData)
+            !stop.current &&
+            (!prevFrameData.current ||
+              hasFrameChanged(prevFrameData.current, currentFrameData))
           ) {
-            if (!changeDetected) {
+            if (!changeDetected.current) {
               window.speechSynthesis.cancel();
 
               console.log('Screen content changed');
-              changeDetected = true;
+              changeDetected.current = true;
 
               const textData = await getText(mainStreamManager);
               if (typeof textData === 'string') {
                 getSpeechForOne(textData);
               }
               console.log('text in handlecapture', textData);
+              setIsLoading(false);
             }
           } else {
             // Reset the flag if no change is detected
-            changeDetected = false;
+            changeDetected.current = false;
+            setIsLoading(false);
           }
 
           prevFrameData.current = currentFrameData;
-          setIsLoading(false);
         } catch (error) {
           console.error('Error capturing frame:', error);
           setIsLoading(false);
         }
       };
-
-      if (prevFrameData.current && isInitialized) {
-        // 중복 실행 방지
-        console.log('이제시작');
-        // intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
+      if (!stop.current) {
+        intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
       }
     }
   };
 
-  const hasFrameChanged = (prev: ImageData, current: ImageData) => {
-    const threshold = 10000; // Define a difference threshold
+  const hasFrameChanged = (prev: ImageData | null, current: ImageData) => {
+    if (!prev) return false;
+    const threshold = 50000; // Define a difference threshold
     let diffCount = 0;
+    const length = prev.data.length;
 
-    for (let i = 0; i < prev.data.length; i += 4) {
+    // Step size를 늘려서 모든 픽셀을 비교하지 않음
+    for (let i = 0; i < length; i += 16) {
+      // 매 4픽셀(4 * 4 = 16 바이트)마다 비교
       const rDiff = Math.abs(prev.data[i] - current.data[i]);
       const gDiff = Math.abs(prev.data[i + 1] - current.data[i + 1]);
       const bDiff = Math.abs(prev.data[i + 2] - current.data[i + 2]);
 
       if (rDiff + gDiff + bDiff > 50) {
-        // If color difference is significant
         diffCount++;
+        if (diffCount > threshold) return true; // 조기 종료
       }
-
-      if (diffCount > threshold) return true; // If enough pixels have changed
     }
 
     return false;
@@ -879,7 +863,7 @@ const Meeting = () => {
               }`}
             >
               <RiSpeakLine size={32} />
-              {isReading ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
+              {isOcrOn ? '공유 화면 읽기 중단' : '공유 화면 읽기'}
             </Button>
           </div>
           <div className="absolute left-1/2 flex -translate-x-1/2 transform flex-row gap-4">

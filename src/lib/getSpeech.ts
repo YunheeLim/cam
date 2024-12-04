@@ -50,7 +50,7 @@ const splitTextByLanguage = (
   const result: { lang: string; content: string }[] = [];
 
   let currentLang = franc(words[0], { minLength: 1 });
-  let buffer = [];
+  let buffer: string[] = [];
 
   for (const word of words) {
     const detectedLang = franc(word, { minLength: 1 });
