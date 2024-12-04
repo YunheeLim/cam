@@ -512,12 +512,13 @@ const Meeting = () => {
 
   const createToken = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions/${sessionId}/connections`,
+      `/api/sessions/${sessionId}/connections`,
       {},
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
+    console.log('bbbbbb', response.data);
     return response.data;
   };
 
