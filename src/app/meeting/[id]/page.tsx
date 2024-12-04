@@ -739,7 +739,7 @@ const Meeting = () => {
   return (
     <>
       {isModalOpen && <ExitModal onOk={leaveSession} onClose={closeModal} />}
-      {<LoadingIndicator />}
+      {isLoading && <LoadingIndicator />}
       <div
         onClick={handleBackgroundClick}
         className="flex h-full w-full flex-col justify-center bg-black"
