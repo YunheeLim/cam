@@ -52,7 +52,7 @@ interface ExtendedStreamManager extends StreamManager {
 
 // OpenVidu global variables
 
-let sessionScreen: Session;
+// let sessionScreen: Session;
 
 const APPLICATION_SERVER_URL = 'http://localhost:5000/';
 
@@ -208,17 +208,14 @@ const Meeting = () => {
   const [myUserName, setMyUserName] = useState<string>('');
   const [isNickNameSet, setIsNickNameSet] = useState(false);
   const [session, setSession] = useState<Session>();
-  const [mainStreamManager, setMainStreamManager] = useState<StreamManager>();
+  const [mainStreamManager, setMainStreamManager] = useState<
+    StreamManager | undefined
+  >(undefined);
   const [publisher, setPublisher] = useState<Publisher>();
   const [subscribers, setSubscribers] = useState<StreamManager[]>([]);
   const subscribersRef = useRef<StreamManager[]>([]); // 구독자 참조
   const [screenSession, setScreenSession] = useState<Session>();
   const [screenPublisher, setScreenPublisher] = useState<Publisher>();
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [videoDeviceList, setVideoDeviceList] = useState([]);
-  const [audioDeviceList, setAudioDeviceList] = useState([]);
-  const [currentVideoDevice, setCurrentVideoDevice] =
-    useState<MediaDeviceInfo>();
 
   const OV = useRef<OpenVidu>();
   const OVScreen = useRef<OpenVidu>();
@@ -228,7 +225,7 @@ const Meeting = () => {
     window.addEventListener('beforeunload', onBeforeUnload);
 
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [session]);
+  }, [session, screenSession]);
 
   const handleMainVideoStream = (stream: StreamManager) => {
     if (mainStreamManager !== stream) setMainStreamManager(stream);
@@ -353,7 +350,6 @@ const Meeting = () => {
         setPublisher(newPublisher);
         // setMainStreamManager(newPublisher);
         setSession(newSession);
-        setScreenSharing(false);
       }
     } catch (error) {
       console.log('Error connecting to the session:', error);
@@ -446,11 +442,11 @@ const Meeting = () => {
               .addEventListener('ended', () => {
                 console.log('User pressed the "Stop sharing" button');
                 sessionScreen.unpublish(publisher);
+                setMainStreamManager(undefined);
               });
             sessionScreen.publish(publisher);
             setScreenSession(sessionScreen);
             setScreenPublisher(publisher);
-            setScreenSharing(true);
           });
 
           publisher?.once('accessDenied', event => {
@@ -473,7 +469,7 @@ const Meeting = () => {
     }
 
     session?.disconnect();
-    sessionScreen?.disconnect();
+    screenSession?.disconnect();
 
     OV.current = undefined;
     OVScreen.current = undefined;
