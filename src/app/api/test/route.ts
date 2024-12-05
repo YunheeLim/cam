@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenVidu } from 'openvidu-node-client';
 
-const OPENVIDU_URL = process.env.OPENVIDU_URL || 'http://localhost:4443/';
-const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET || 'MY_SECRET';
+const OPENVIDU_URL =
+  process.env.NEXT_PUBLIC_OPENVIDU_URL || 'http://localhost:4443/';
+const OPENVIDU_SECRET = process.env.NEXT_PUBLIC_OPENVIDU_SECRET || 'MY_SECRET';
+
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
 export async function POST(req: NextRequest) {
