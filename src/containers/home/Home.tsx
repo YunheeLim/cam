@@ -5,14 +5,13 @@ import MeetingButton from './MeetingButton';
 import Accessibility from './Accessibility';
 import Button from '@/components/Button';
 import Modal from '@/containers/home/Modal';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
 import encrypt from '@/lib/encrypt';
 
 const Home = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);

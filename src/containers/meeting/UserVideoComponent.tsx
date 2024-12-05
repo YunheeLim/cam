@@ -1,6 +1,6 @@
 import React, { useEffect, useState, forwardRef } from 'react';
 import OpenViduVideoComponent from './OvVideo';
-import MicOff from '../../../../public/svgs/mic_off.svg';
+import MicOff from '../../../public/svgs/mic_off.svg';
 
 interface UserVideoComponentProps {
   streamManager: any;
