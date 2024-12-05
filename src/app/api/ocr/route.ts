@@ -5,11 +5,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { NextResponse } from 'next/server';
 
 // Disable body parsing for raw data
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextApiRequest) {
   if (req.method !== 'POST') {
