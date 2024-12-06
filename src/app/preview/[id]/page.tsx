@@ -14,6 +14,7 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 const DATA = {
   user_name: '홍길동',
@@ -23,6 +24,7 @@ const Preview = () => {
   const router = useRouter();
   const params = useParams();
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // 회의실 새로고침 관련
@@ -184,6 +186,7 @@ const Preview = () => {
     setNickName(e.target.value);
   };
 
+  // 참가 버튼 클릭
   const handleJoinClick = () => {
     router.push(
       `/meeting/${sessionId}?nickName=${nickName ? nickName : DATA.user_name}`,
