@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
         );
       }
       const connection = await session.createConnection(body);
-
-      console.log('aaaaaaaaaaaaaaa', session, connection.token);
+      console.log('session cnt: ', openvidu.activeSessions.length);
+      console.log('which session?', session, connection.token);
 
       return NextResponse.json({ token: connection.token }, { status: 200 });
     }
