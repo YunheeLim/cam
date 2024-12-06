@@ -507,7 +507,8 @@ const Meeting = () => {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('세션아이디:', response.data.sessionId);
+    console.log('현재 회의실 개수:', response.data.cnt);
+
     return response.data.sessionId;
   };
 
@@ -519,7 +520,7 @@ const Meeting = () => {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('토큰:', response.data.token);
+
     return response.data.token;
   };
 

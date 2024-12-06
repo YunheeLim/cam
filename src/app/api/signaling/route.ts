@@ -12,12 +12,13 @@ export async function POST(req: NextRequest) {
     const url = new URL(req.url || '');
     const sessionId = url.searchParams.get('sessionId');
     const body = await req.json();
+    console.log('session cnt: ', openvidu?.activeSessions?.length);
 
     if (!sessionId) {
       // Handle POST /api/signaling
       const session = await openvidu.createSession(body);
       return NextResponse.json(
-        { sessionId: session.sessionId },
+        { sessionId: session.sessionId, cnt: openvidu?.activeSessions?.length },
         { status: 200 },
       );
     } else {
@@ -33,8 +34,6 @@ export async function POST(req: NextRequest) {
         );
       }
       const connection = await session.createConnection(body);
-      console.log('session cnt: ', openvidu.activeSessions.length);
-      console.log('which session?', session, connection.token);
 
       return NextResponse.json({ token: connection.token }, { status: 200 });
     }
