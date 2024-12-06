@@ -18,8 +18,8 @@ import PeopleIcon from '../../../../public/svgs/people.svg';
 import ExitIcon from '../../../../public/svgs/exit.svg';
 import Video from '@/components/Video';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import UserVideoComponent from './UserVideoComponent';
-import OpenViduVideoComponent from './OvVideo';
+import UserVideoComponent from '../../../containers/meeting/UserVideoComponent';
+import OpenViduVideoComponent from '../../../containers/meeting/OvVideo';
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
@@ -204,7 +204,7 @@ const Meeting = () => {
     }
   };
 
-  const [mySessionId, setMySessionId] = useState<string>('SessionA');
+  const [mySessionId, setMySessionId] = useState<string>('');
   const [myUserName, setMyUserName] = useState<string>('');
   const [isNickNameSet, setIsNickNameSet] = useState(false);
   const [session, setSession] = useState<Session>();
@@ -496,29 +496,32 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
-  const APPLICATION_SERVER_URL = '/api/signaling/';
+  const APPLICATION_SERVER_URL = '';
+  // const APPLICATION_SERVER_URL = 'http://localhost:5000';
 
   const createSession = async (sessionId: string) => {
     const response = await axios.post(
-      `/api/sessions`,
+      `${APPLICATION_SERVER_URL}/api/signaling`,
       { customSessionId: sessionId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('asdfasdf', response.data);
-    return response.data;
+    console.log('현재 회의실 개수:', response.data.cnt);
+
+    return response.data.sessionId;
   };
 
   const createToken = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}api/sessions/${sessionId}/connections`,
+      `${APPLICATION_SERVER_URL}/api/signaling?sessionId=${sessionId}`,
       {},
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    return response.data;
+
+    return response.data.token;
   };
 
   // 공유 화면 읽기 (버튼 누를 때만 한시적으로)

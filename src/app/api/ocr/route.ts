@@ -1,17 +1,12 @@
 // pages/api/ocr.ts
 
 import axios from 'axios';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
 // Disable body parsing for raw data
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const dynamic = 'force-dynamic';
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: NextRequest) {
   if (req.method !== 'POST') {
     NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
     return;
@@ -21,11 +16,14 @@ export async function POST(req: NextApiRequest) {
   const ocr_key = process.env.NEXT_PUBLIC_OCR_API_KEY;
 
   // Collect raw data from request
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of req) {
-    chunks.push(chunk);
-  }
-  const rawBody = Buffer.concat(chunks).toString('utf-8'); // base64 image data
+  // const chunks: Uint8Array[] = [];
+  // for await (const chunk of req) {
+  //   chunks.push(chunk);
+  // }
+  // const rawBody = Buffer.concat(chunks).toString('utf-8'); // base64 image data
+
+  // Read the raw body as a string
+  const rawBody = await req.text();
 
   const data = {
     version: 'V2',
