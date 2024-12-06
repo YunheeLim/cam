@@ -263,9 +263,6 @@ const Preview = () => {
               )}
             </div>
           </div>
-          <button className="flex h-12 w-12 items-center justify-center rounded-lg border border-primary">
-            <SettingIcon fill={'#5856D6'} />
-          </button>
         </div>
         <div className="flex w-full flex-row gap-4">
           <Input
