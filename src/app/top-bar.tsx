@@ -14,7 +14,10 @@ export function TopBar() {
         pathname.includes('/meeting') ? 'bg-black' : 'bg-[#ffffff]'
       } `}
     >
-      <div onClick={() => router.push('/')} className="flex cursor-pointer">
+      <div
+        onClick={() => router.push('/')}
+        className="flex cursor-pointer items-center"
+      >
         <Logo width={30} height={30} />
         <h1 className="mx-2 text-3xl font-semibold text-primary">C.A.M</h1>
       </div>

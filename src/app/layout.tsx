@@ -3,7 +3,6 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { TopBar } from './top-bar';
 import { VideoProvider } from './contexts/VideoContext';
-import 'regenerator-runtime/runtime';
 
 const pretendard = localFont({
   src: '../../public/fonts/PretendardVariable.woff2',
