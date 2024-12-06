@@ -37,7 +37,11 @@ const Modal: React.FC<ModalProps> = ({ onClose }) => {
     } else {
       const res = await getData();
       console.log(res);
-      // router.push(`/preview/${text}?type=exist`);
+      if (res.result === 'true') {
+        router.push(`/preview/${text}?type=exist`);
+      } else if (res.result === 'false') {
+        setWarning('잘못된 회의ID 입니다. 다시 확인해주세요.');
+      }
     }
   };
 
