@@ -7,7 +7,7 @@ const OPENVIDU_SECRET = process.env.NEXT_PUBLIC_OPENVIDU_SECRET || '';
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
 export async function POST(req: NextRequest) {
-  console.log('openvidu url', process.env.OPENVIDU_URL);
+  console.log('openvidu url', OPENVIDU_URL);
   try {
     const url = new URL(req.url || '');
     const sessionId = url.searchParams.get('sessionId');
