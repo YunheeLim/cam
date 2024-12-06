@@ -37,16 +37,16 @@ const CopyMeetingId: React.FC<CopyMeetingIdProps> = ({
 
   return (
     <div
-      className={`absolute bottom-20 right-0 rounded-lg bg-white p-5 shadow-lg`}
+      className={`absolute bottom-20 right-0 rounded-lg bg-white px-7 py-6 shadow-lg`}
     >
-      <div className="relative flex flex-col gap-2 pt-3">
+      <div className="relative flex flex-col gap-2 pt-1">
         <div
           onClick={onClose}
-          className="absolute -right-3 -top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-gray-200"
+          className="absolute -right-6 -top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-gray-200"
         >
           <IoMdClose size={20} color="#696969" />
         </div>
-        <div className=" text-gray-700">
+        <div className="text-gray-700">
           회의에 참여하기를 원하는 다른 사용자와 이 회의 ID를 공유하세요.
         </div>
         <Input
