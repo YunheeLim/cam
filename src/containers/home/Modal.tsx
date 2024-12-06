@@ -6,6 +6,7 @@ import CloseIcon from '../../../public/svgs/close.svg';
 import Input from '@/components/Input';
 import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import axios from 'axios';
 
 interface ModalProps {
   onClose: () => void;
@@ -30,11 +31,13 @@ const Modal: React.FC<ModalProps> = ({ onClose }) => {
   };
 
   // 회의 참가
-  const handleJoinClick = () => {
+  const handleJoinClick = async () => {
     if (text === '') {
       setWarning('회의 ID를 입력해주세요.');
     } else {
-      router.push(`/preview/${text}?type=exist`);
+      const res = await getData();
+      console.log(res);
+      // router.push(`/preview/${text}?type=exist`);
     }
   };
 
@@ -42,6 +45,18 @@ const Modal: React.FC<ModalProps> = ({ onClose }) => {
   useHotkeys('enter', handleJoinClick, {
     enabled: localStorage.getItem('shortcut') === 'true',
   });
+
+  // 회의실 존재 여부
+  const getData = async () => {
+    try {
+      const response = await axios.get(`/api/signaling?sessionId=${text}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response.data;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div

@@ -6,6 +6,33 @@ const OPENVIDU_SECRET = process.env.NEXT_PUBLIC_OPENVIDU_SECRET || '';
 
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
+// 회의실 존재 여부
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url || '');
+  const sessionId = url.searchParams.get('sessionId');
+
+  try {
+    const session = openvidu.activeSessions.find(
+      s => s.sessionId === sessionId,
+    );
+
+    if (session) {
+      return NextResponse.json({ result: 'true' }, { status: 200 });
+    } else {
+      return NextResponse.json(
+        { result: 'false', error: 'Session not found' },
+        { status: 200 },
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   console.log('openvidu url', OPENVIDU_URL);
   try {

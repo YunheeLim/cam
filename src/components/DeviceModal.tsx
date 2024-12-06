@@ -42,13 +42,13 @@ const DeviceModal: React.FC<DeviceModalProps> = ({
     <div
       className={`absolute left-0 ${
         page === 'meeting' ? 'bottom-14' : 'top-14'
-      }  shadow-custom-all z-10 w-fit overflow-hidden rounded-lg bg-white`}
+      }  z-10 w-fit overflow-hidden rounded-lg bg-white shadow-custom-all`}
     >
       {list?.map((item: ItemProps) => (
         <div
           key={item.deviceId}
           onClick={() => handleSelect(item.deviceId)}
-          className="border-white-hover hover:bg-white-hover flex cursor-pointer flex-row items-center gap-2 whitespace-nowrap border-b p-3 font-semibold text-primary"
+          className="hover:bg-white-hover-1 flex cursor-pointer flex-row items-center gap-2 whitespace-nowrap border-b border-white-hover p-3 font-semibold text-primary"
         >
           {item.label}
           {item.deviceId === selectedDeviceId && <FaCheck size={20} />}

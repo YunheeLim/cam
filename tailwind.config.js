@@ -18,7 +18,7 @@ module.exports = {
           2: '#7E47EB',
         },
         secondary: { DEFAULT: '#C74E5B', hover: '#D85F6C' },
-        white: { DEFAULT: '#FAF9F6', hover: '#F2F2F2' },
+        white: { DEFAULT: '#FAF9F6', hover: { 1: '#F1F1F1', 2: '#f3f3f3' } },
       },
       fontFamily: {
         pretendard: ['var(--font-pretendard)', 'sans-serif'],
