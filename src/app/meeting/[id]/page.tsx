@@ -20,6 +20,8 @@ import Video from '@/components/Video';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UserVideoComponent from '../../../containers/meeting/UserVideoComponent';
 import OpenViduVideoComponent from '../../../containers/meeting/OvVideo';
+import UserVideoComponent from '../../../containers/meeting/UserVideoComponent';
+import OpenViduVideoComponent from '../../../containers/meeting/OvVideo';
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
@@ -496,6 +498,8 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
+  const APPLICATION_SERVER_URL = '';
+  // const APPLICATION_SERVER_URL = 'http://localhost:5000';
   const APPLICATION_SERVER_URL = '';
   // const APPLICATION_SERVER_URL = 'http://localhost:5000';
 

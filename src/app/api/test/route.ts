@@ -1,31 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenVidu } from 'openvidu-node-client';
-import Cors from 'cors';
 
-// Initialize CORS middleware
-const cors = Cors({
-  origin: '*',
-});
+const OPENVIDU_URL =
+  process.env.NEXT_PUBLIC_OPENVIDU_URL || 'http://localhost:4443/';
+const OPENVIDU_SECRET = process.env.NEXT_PUBLIC_OPENVIDU_SECRET || 'MY_SECRET';
 
-// Helper method to wait for a middleware to execute before continuing
-function runMiddleware(req: NextRequest, res: NextResponse, fn: Function) {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result: any) => {
-      if (result instanceof Error) {
-        return reject(result);
-      }
-      return resolve(result);
-    });
-  });
-}
-
-const OPENVIDU_URL = process.env.OPENVIDU_URL || 'http://localhost:4443/';
-const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET || 'MY_SECRET';
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
 
-// app/api/users/route.ts
-export async function GET(req: NextRequest) {
-  return NextResponse.json({
-    name: 'John Doe',
-  });
+export async function POST(req: NextRequest) {
+  try {
+    const url = new URL(req.url || '');
+    const sessionId = url.searchParams.get('sessionId');
+    const body = await req.json();
+
+    if (!sessionId || sessionId === 'test') {
+      // Handle POST /api/test
+      const session = await openvidu.createSession(body);
+      return NextResponse.json(
+        { sessionId: session.sessionId },
+        { status: 200 },
+      );
+    } else {
+      // Handle POST /api/test/:sessionId
+      const session = openvidu.activeSessions.find(
+        s => s.sessionId === sessionId,
+      );
+
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Session not found' },
+          { status: 404 },
+        );
+      }
+      const connection = await session.createConnection(body);
+
+      console.log('aaaaaaaaaaaaaaa', session, connection.token);
+
+      return NextResponse.json({ token: connection.token }, { status: 200 });
+    }
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 },
+    );
+  }
 }
