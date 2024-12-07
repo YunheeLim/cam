@@ -21,7 +21,7 @@ const encrypt = () => {
     CryptoJS.enc.Utf8,
   );
 
-  return sanitizedEncryptedId;
+  return sanitizedEncryptedId.slice(0, 11);
 };
 
 export default encrypt;

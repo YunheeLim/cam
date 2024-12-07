@@ -1,12 +1,11 @@
 'use client';
 
 import Home from '@/containers/home/Home';
-import { use } from 'react';
+import OnBoarding from '@/containers/onBoarding/OnBoarding';
+import SignIn from '@/containers/signIn/SignIn';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function RootPage() {
-  return (
-    <>
-      <Home />
-    </>
-  );
+  return <OnBoarding />;
 }

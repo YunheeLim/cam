@@ -10,7 +10,11 @@ const OnBoarding = () => {
   useEffect(() => {
     // 1.5초 뒤 페이지 이동
     const timer = setTimeout(() => {
-      router.push('/home'); // 이동할 페이지 경로
+      if (window.localStorage.getItem('user_id')) {
+        router.push('/home');
+      } else {
+        router.push('/signIn');
+      }
     }, 1500);
 
     return () => clearTimeout(timer);
@@ -24,12 +28,9 @@ const OnBoarding = () => {
       <div className="animate-fade-in-up text-7xl font-bold text-primary delay-100">
         C A M
       </div>
-      <div className="animate-fade-in-up mt-6 text-3xl font-medium text-primary-2 delay-200">
+      <div className="animate-fade-in-up mt-6 text-3xl font-medium text-primary delay-200">
         Can Anyone Meet?
       </div>
-      {/* <button className="mt-10 rounded-lg bg-primary px-6 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:bg-primary-hover">
-        시작하기
-      </button> */}
     </div>
   );
 };
