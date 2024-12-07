@@ -16,13 +16,11 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
 import LoadingIndicator from '@/components/LoadingIndicator';
 
-const DATA = {
-  user_name: '홍길동',
-};
-
 const Preview = () => {
   const router = useRouter();
   const params = useParams();
+  const [userName, setUserName] = useState<string | null>('');
+  const [nickName, setNickName] = useState<string | null>('');
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +31,11 @@ const Preview = () => {
     // 단축키 설정 정보
     if (window.localStorage.getItem('shortcut') === 'true') {
       setIsShortcut(true);
+    }
+
+    if (window.localStorage.getItem('user_name')) {
+      setNickName(window.localStorage.getItem('user_name'));
+      setUserName(window.localStorage.getItem('user_name'));
     }
   }, []);
 
@@ -57,7 +60,6 @@ const Preview = () => {
   const [isVideoListOpen, setIsVideoListOpen] = useState(false);
   const [isAudioListOpen, setIsAudioListOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | string[]>('');
-  const [nickName, setNickName] = useState<string>(DATA.user_name);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -188,9 +190,7 @@ const Preview = () => {
 
   // 참가 버튼 클릭
   const handleJoinClick = () => {
-    router.push(
-      `/meeting/${sessionId}?nickName=${nickName ? nickName : DATA.user_name}`,
-    );
+    router.push(`/meeting/${sessionId}?nickName=${nickName ?? userName}`);
   };
 
   useHotkeys('enter', handleJoinClick, {
@@ -214,7 +214,7 @@ const Preview = () => {
           isCameraOn={isCameraOn}
           isMicOn={isMicOn}
           nickName={nickName}
-          userName={DATA.user_name}
+          userName={userName}
         />
 
         <div
@@ -270,7 +270,7 @@ const Preview = () => {
         <div className="flex w-full flex-row gap-4">
           <Input
             placeholder="사용할 이름을 입력해주세요"
-            defaultValue={'홍길동'}
+            defaultValue={userName}
             onChange={handleChange}
             className="basis-3/4"
           />
