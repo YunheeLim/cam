@@ -71,7 +71,10 @@ const SignIn = () => {
           <Button onClick={handleSignIn} className="w-full">
             로그인
           </Button>
-          <Button className="hover:!bg-white-hover-2 w-full !border !border-primary !bg-[#ffffff] !text-primary">
+          <Button
+            onClick={() => router.push('/signUp')}
+            className="hover:!bg-white-hover-2 w-full !border !border-primary !bg-[#ffffff] !text-primary"
+          >
             회원가입
           </Button>
         </div>
