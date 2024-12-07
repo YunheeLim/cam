@@ -9,13 +9,15 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
 import encrypt from '@/lib/encrypt';
 import axios from 'axios';
+import AuthModal from './AuthModal';
 
 const Home = () => {
   const router = useRouter();
   const pathname = usePathname();
 
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 참여 모달
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [tempKeyboard, setTempKeyBoard] = useState(false); // 토글만
   const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
   const [userId, setUserId] = useState<string | null>('');
@@ -68,8 +70,18 @@ const Home = () => {
   // 회의 참가 단축키: 2
   useHotkeys('2', handleOpenModal, { enabled: isKeyboard });
 
+  // 참가 모달 닫기
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenAuthModal = () => {
+    setIsAuthModalOpen(prev => !prev);
+  };
+
+  // 유저 모달 닫기
+  const handleCloseAuthModal = () => {
+    setIsAuthModalOpen(false);
   };
 
   // 단축키 토글
@@ -120,6 +132,8 @@ const Home = () => {
   return (
     <>
       {isModalOpen && <Modal onClose={handleCloseModal} />}
+      {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} />}
+
       <div
         id="container"
         className="flex h-full w-full flex-row items-center justify-center"
