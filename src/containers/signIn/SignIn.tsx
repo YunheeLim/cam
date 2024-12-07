@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import axios from 'axios';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import Toast from '@/components/Toast';
 
 const SignIn = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const SignIn = () => {
   const [warningPw, setWarningPw] = useState('');
   const [isPw, setIsPw] = useState(false); // 비밀번호 보기
   const [isLoading, setIsLoading] = useState(false); // 로딩
+  const [popUp, setPopUp] = useState('');
 
   // 아이디 입력
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,20 +50,24 @@ const SignIn = () => {
         if (response.status === 200) {
           window.localStorage.setItem('user_id', id);
           router.push('/home');
-        } else {
-          console.log('Failed to sign in', response);
         }
-        setIsLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to sign in', err);
+        setPopUp('계정 정보를 찾을 수 없습니다.');
         setIsLoading(false);
       }
     }
   };
 
+  useEffect(() => {
+    if (popUp) {
+    }
+  }, [popUp]);
+
   return (
     <>
       {isLoading && <LoadingIndicator />}
+      {popUp && <Toast message={popUp} onClose={() => setPopUp('')} />}
       <div className="flex h-full w-full flex-col items-center justify-center">
         <div className="flex w-[416px] flex-col items-center gap-8">
           <div className="flex w-full flex-col items-center gap-1 font-semibold text-primary">
