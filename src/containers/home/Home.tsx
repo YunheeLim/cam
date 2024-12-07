@@ -8,6 +8,7 @@ import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
 import encrypt from '@/lib/encrypt';
+import axios from 'axios';
 
 const Home = () => {
   const router = useRouter();
@@ -17,13 +18,37 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempKeyboard, setTempKeyBoard] = useState(false); // 토글만
   const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
+  const [userId, setUserId] = useState<string | null>('');
 
   useEffect(() => {
     if (window.localStorage.getItem('shortcut') === 'true') {
       setTempKeyBoard(true);
       setIsKeyBoard(true);
     }
+    if (window.localStorage.getItem('user_id')) {
+      setUserId(window.localStorage.getItem('user_id'));
+    }
   }, []);
+
+  const getUser = async () => {
+    try {
+      const response = await axios.post(`/api/user`, { user_id: userId });
+      console.log('res:', response);
+      if (response.status === 200) {
+        window.localStorage.setItem('user_name', response.data.user_name);
+      } else {
+        console.log('Failed to get user name', response);
+      }
+    } catch (err) {
+      console.error('Failed to get user name', err);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      getUser();
+    }
+  }, [userId]);
 
   // 회의 생성
   const handleCreateMeeting = async () => {
