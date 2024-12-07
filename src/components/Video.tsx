@@ -6,8 +6,8 @@ interface VideoProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   isCameraOn: boolean;
   isMicOn: boolean;
-  nickName: string;
-  userName: string;
+  nickName: string | null;
+  userName: string | null;
 }
 
 const Video: React.FC<VideoProps> = ({
@@ -35,7 +35,7 @@ const Video: React.FC<VideoProps> = ({
       {!isCameraOn && (
         <div className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-primary-2 text-4xl font-semibold text-white">
           {/* 입력한 닉네임이 공백일 때 기본 이름으로 설정 */}
-          {nickName[0] ?? userName[0]}
+          {nickName && userName && (nickName[0] ?? userName[0])}
         </div>
       )}
       {/* 마이크 off */}
