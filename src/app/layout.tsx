@@ -24,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="kr" className={`${pretendard.variable}`}>
       <VideoProvider>
-        <body className={`${pretendard.variable}`}>{children}</body>
+        <body className={`${pretendard.variable} h-screen w-screen`}>
+          {children}
+        </body>
       </VideoProvider>
     </html>
   );

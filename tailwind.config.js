@@ -54,6 +54,14 @@ module.exports = {
       },
       animation: {
         spinSlow: 'spin 2s linear infinite', // 3초로 회전 속도 조정
+        rotate: 'spin 5s linear forwards', // 4초 동안 무한 회전
+        'fade-in-up': 'fadeInUp 0.8s ease-out',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
     },
   },
