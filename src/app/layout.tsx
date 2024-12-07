@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import { TopBar } from './top-bar';
+import { TopBar } from '../components/TopBar';
 import { VideoProvider } from './contexts/VideoContext';
-import 'regenerator-runtime/runtime';
 
 const pretendard = localFont({
   src: '../../public/fonts/PretendardVariable.woff2',
@@ -24,12 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr" className={`${pretendard.variable}`}>
-      <body className={`${pretendard.variable} flex h-screen flex-col`}>
-        <TopBar />
-        <VideoProvider>
-          <div className="flex h-full w-full">{children}</div>
-        </VideoProvider>
-      </body>
+      <VideoProvider>
+        <body className={`${pretendard.variable} h-screen w-screen`}>
+          {children}
+        </body>
+      </VideoProvider>
     </html>
   );
 }

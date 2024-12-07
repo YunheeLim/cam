@@ -14,6 +14,7 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { useHotkeys } from 'react-hotkeys-hook';
 import DeviceModal from '@/components/DeviceModal';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 const DATA = {
   user_name: '홍길동',
@@ -23,6 +24,7 @@ const Preview = () => {
   const router = useRouter();
   const params = useParams();
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // 회의실 새로고침 관련
@@ -117,14 +119,9 @@ const Preview = () => {
 
       setStream(mediaStream);
 
-      // 오디오 출력 방지
-      const audioTracks = mediaStream.getAudioTracks();
-      audioTracks.forEach(track => {
-        track.enabled = false; // 오디오 출력 비활성화
-      });
-
       if (videoRef?.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.muted = true; // 오디오 플레잉백 방지
       }
     } catch (error) {
       console.log('Failed to access media devices', error);
@@ -189,6 +186,7 @@ const Preview = () => {
     setNickName(e.target.value);
   };
 
+  // 참가 버튼 클릭
   const handleJoinClick = () => {
     router.push(
       `/meeting/${sessionId}?nickName=${nickName ? nickName : DATA.user_name}`,
@@ -200,93 +198,6 @@ const Preview = () => {
   });
 
   useHotkeys('left', () => router.back(), { enabled: isShortcut });
-
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const prevFrameData = useRef<ImageData | null>(null);
-  // const animationFrameId = useRef<number | null>(null); // To store the animation frame ID
-  const intervalIdRef = useRef<number | null>(null);
-
-  const detectChanges = () => {
-    if (!canvasRef.current || !videoRef.current) return;
-
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
-    const track = stream?.getVideoTracks()[0];
-    if (!track) return;
-
-    const imageCapture = new (window as any).ImageCapture(track);
-
-    const checkFrame = async () => {
-      try {
-        const bitmap = await imageCapture.grabFrame();
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
-        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
-
-        const currentFrameData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-        );
-        if (
-          prevFrameData.current &&
-          hasFrameChanged(prevFrameData.current, currentFrameData)
-        ) {
-          console.log('Screen content changed, capturing...');
-          const capturedBlob = canvas.toDataURL('image/png');
-          setCapturedImage(capturedBlob);
-        }
-
-        prevFrameData.current = currentFrameData;
-      } catch (error) {
-        console.error('Error capturing frame:', error);
-      }
-      // requestAnimationFrame(checkFrame);
-    };
-    //  requestAnimationFrame(checkFrame);
-
-    intervalIdRef.current = window.setInterval(checkFrame, 1000); // 1-second interval
-  };
-
-  const hasFrameChanged = (prev: ImageData, current: ImageData) => {
-    const threshold = 10000; // Define a difference threshold
-    let diffCount = 0;
-
-    for (let i = 0; i < prev.data.length; i += 4) {
-      const rDiff = Math.abs(prev.data[i] - current.data[i]);
-      const gDiff = Math.abs(prev.data[i + 1] - current.data[i + 1]);
-      const bDiff = Math.abs(prev.data[i + 2] - current.data[i + 2]);
-
-      if (rDiff + gDiff + bDiff > 50) {
-        // If color difference is significant
-        diffCount++;
-      }
-
-      if (diffCount > threshold) return true; // If enough pixels have changed
-    }
-
-    return false;
-  };
-
-  // useEffect(() => {
-  //   if (stream) {
-  //     detectChanges();
-  //   }
-  //   return () => {
-  //     prevFrameData.current = null;
-
-  //     // Cleanup requestAnimationFrame on component unmount
-  //     if (intervalIdRef.current) {
-  //       console.log('========cleanup 1=========');
-  //       clearInterval(intervalIdRef.current);
-  //       intervalIdRef.current = null; // Clear the interval ID
-  //     }
-  //   };
-  // }, [stream]);
 
   return (
     <div
@@ -305,12 +216,6 @@ const Preview = () => {
           nickName={nickName}
           userName={DATA.user_name}
         />
-        <canvas
-          ref={canvasRef}
-          width={640}
-          height={480}
-          style={{ display: 'none' }}
-        ></canvas>
 
         <div
           className="my-6 flex w-full flex-row justify-between"
@@ -361,9 +266,6 @@ const Preview = () => {
               )}
             </div>
           </div>
-          <button className="flex h-12 w-12 items-center justify-center rounded-lg border border-primary">
-            <SettingIcon fill={'#5856D6'} />
-          </button>
         </div>
         <div className="flex w-full flex-row gap-4">
           <Input
@@ -376,12 +278,6 @@ const Preview = () => {
             참가
           </Button>
         </div>
-        {capturedImage && (
-          <div>
-            <h2>Captured Image:</h2>
-            <img src={capturedImage} alt="Captured screen" />
-          </div>
-        )}
       </div>
     </div>
   );

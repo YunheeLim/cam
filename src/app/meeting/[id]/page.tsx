@@ -10,16 +10,13 @@ import CameraOff from '../../../../public/svgs/camera_off.svg';
 import MicOn from '../../../../public/svgs/mic_on.svg';
 import MicOff from '../../../../public/svgs/mic_off.svg';
 import { RiSpeakLine } from 'react-icons/ri';
-// import SpeakerOn from '../../../../public/svgs/speaker_on.svg';
-// import SpeakerOff from '../../../../public/svgs/speaker_off.svg';
 import ScreenShareIcon from '../../../../public/svgs/screenshare.svg';
 import SettingIcon from '../../../../public/svgs/setting.svg';
+import MoreIcon from '../../../../public/svgs/more.svg';
 import PeopleIcon from '../../../../public/svgs/people.svg';
 import ExitIcon from '../../../../public/svgs/exit.svg';
-import Video from '@/components/Video';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UserVideoComponent from '../../../containers/meeting/UserVideoComponent';
-import OpenViduVideoComponent from '../../../containers/meeting/OvVideo';
 import { OpenVidu, Session, Publisher, StreamManager } from 'openvidu-browser';
 import axios from 'axios';
 import { HiOutlineSpeakerWave as SpeakerOn } from 'react-icons/hi2';
@@ -116,7 +113,7 @@ const Meeting = () => {
   const [isShortcut, setIsShortcut] = useState(false); // 키보드 단축키
   const [isReading, setIsReading] = useState(false); // ocr 텍스트 리딩 상태
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false); // 참여자 리스트 모달
-  const [isSettingOpen, setIsSettingOpen] = useState(false); // 셋팅 모달
+  const [isMoreOpen, setisMoreOpen] = useState(false); // 셋팅 모달
 
   // 단축키 설정 정보
   useEffect(() => {
@@ -191,8 +188,8 @@ const Meeting = () => {
   };
 
   // 셋팅 클릭
-  const handleSettingClick = () => {
-    setIsSettingOpen(prev => !prev);
+  const handleMoreClick = () => {
+    setisMoreOpen(prev => !prev);
   };
 
   // 모달창 외부 클릭 시 모달 닫힘
@@ -204,7 +201,7 @@ const Meeting = () => {
     }
   };
 
-  const [mySessionId, setMySessionId] = useState<string>('SessionA');
+  const [mySessionId, setMySessionId] = useState<string>('');
   const [myUserName, setMyUserName] = useState<string>('');
   const [isNickNameSet, setIsNickNameSet] = useState(false);
   const [session, setSession] = useState<Session>();
@@ -496,30 +493,28 @@ const Meeting = () => {
     return await createToken(sessionId);
   };
 
-  const APPLICATION_SERVER_URL = '';
-  // const APPLICATION_SERVER_URL = 'http://localhost:5000';
-
   const createSession = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}/api/test`,
+      `/api/signaling`,
       { customSessionId: sessionId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('세션아이디:', response.data.sessionId);
+    console.log('현재 회의실 개수:', response.data.cnt);
+
     return response.data.sessionId;
   };
 
   const createToken = async (sessionId: string) => {
     const response = await axios.post(
-      `${APPLICATION_SERVER_URL}/api/test?sessionId=${sessionId}`,
+      `/api/signaling?sessionId=${sessionId}`,
       {},
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
-    console.log('토큰:', response.data.token);
+
     return response.data.token;
   };
 
@@ -894,13 +889,13 @@ const Meeting = () => {
               )}
             </div>
             <div className="relative">
-              <Button onClick={handleSettingClick} className="p-2">
-                <SettingIcon fill={'#ffffff'} />
+              <Button onClick={handleMoreClick} className="p-2">
+                <MoreIcon fill={'#ffffff'} />
               </Button>
             </div>
-            {isSettingOpen && (
+            {isMoreOpen && (
               <CopyMeetingId
-                onClose={() => setIsSettingOpen(false)}
+                onClose={() => setisMoreOpen(false)}
                 meetingId={mySessionId}
               />
             )}
