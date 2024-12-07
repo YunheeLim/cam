@@ -34,7 +34,7 @@ const ParticipantsModal: React.FC<ParticipantsModalProps> = ({
       {participantsList?.map((item: string) => (
         <div
           key={item}
-          className="border-white-hover hover:bg-white-hover flex cursor-pointer flex-row items-center gap-2 whitespace-nowrap border-b p-3 font-semibold text-primary"
+          className="hover:bg-white-hover-1 flex cursor-pointer flex-row items-center gap-2 whitespace-nowrap border-b border-white-hover p-3 font-semibold text-primary"
         >
           {item}
         </div>

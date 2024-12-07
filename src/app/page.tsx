@@ -1,14 +1,11 @@
 'use client';
 
 import Home from '@/containers/home/Home';
-import { use } from 'react';
-// import SvgSprites from '../../public/svgs/svg_sprites';
+import OnBoarding from '@/containers/onBoarding/OnBoarding';
+import SignIn from '@/containers/signIn/SignIn';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export default function HomePage() {
-  return (
-    <>
-      {/* <SvgSprites /> */}
-      <Home />
-    </>
-  );
+export default function RootPage() {
+  return <OnBoarding />;
 }
