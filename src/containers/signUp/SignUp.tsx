@@ -6,6 +6,7 @@ import Button from '@/components/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
+import axios from 'axios';
 
 const SignUp = () => {
   const router = useRouter();
@@ -80,7 +81,7 @@ const SignUp = () => {
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!id) {
       setWarningId('아이디를 입력해주세요.');
     }
@@ -95,6 +96,31 @@ const SignUp = () => {
     }
     if (!pwCheck) {
       setWarningPwCheck('비밀번호를 확인해주세요.');
+    }
+    if (id && email && name && pw && pwCheck) {
+      if (
+        !warningId &&
+        !warningEmail &&
+        !warningName &&
+        !warningPw &&
+        !warningPwCheck
+      ) {
+        try {
+          const response = await axios.post('/api/signUp', {
+            user_id: id,
+            user_email: email,
+            user_name: name,
+          });
+          console.log('res:', response);
+          if (response.status === 200) {
+            router.push('/signIn');
+          } else {
+            console.log('Failed to sign up', response);
+          }
+        } catch (err) {
+          console.error('Failed to sign up', err);
+        }
+      }
     }
   };
 
