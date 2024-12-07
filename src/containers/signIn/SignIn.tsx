@@ -46,6 +46,7 @@ const SignIn = () => {
         });
         console.log('res:', response);
         if (response.status === 200) {
+          window.localStorage.setItem('user_id', id);
           router.push('/home');
         } else {
           console.log('Failed to sign in', response);

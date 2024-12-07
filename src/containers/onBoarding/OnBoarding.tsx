@@ -24,7 +24,7 @@ const OnBoarding = () => {
       <div className="animate-fade-in-up text-7xl font-bold text-primary delay-100">
         C A M
       </div>
-      <div className="animate-fade-in-up mt-6 text-3xl font-medium text-primary-2 delay-200">
+      <div className="animate-fade-in-up mt-6 text-3xl font-medium text-primary delay-200">
         Can Anyone Meet?
       </div>
     </div>
