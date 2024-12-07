@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import axios from 'axios';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const SignUp = () => {
   const router = useRouter();
@@ -129,6 +130,8 @@ const SignUp = () => {
       }
     }
   };
+
+  useHotkeys('enter', handleSignUp);
 
   return (
     <>

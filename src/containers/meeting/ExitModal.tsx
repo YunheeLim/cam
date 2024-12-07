@@ -23,17 +23,15 @@ const ExitModal: React.FC<ExitModalProps> = ({ onOk, onClose }) => {
     }
   }, []);
 
-  // 모달창 닫기 or 나가기 취소 단축키: esc
-  useHotkeys('esc', onClose, { enabled: isShortcut });
-  // 회의 나가기 단축키: esc
-  useHotkeys('enter', onOk, { enabled: isShortcut });
-
   // 모달창 외부 클릭 시 모달 닫힘
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
+  useHotkeys('esc', onClose, { enabled: isShortcut }); // 모달창 닫기
+  useHotkeys('enter', onOk, { enabled: isShortcut }); // 회의 나가기 확인
 
   return (
     <div

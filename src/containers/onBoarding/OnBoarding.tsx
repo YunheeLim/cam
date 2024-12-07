@@ -15,7 +15,7 @@ const OnBoarding = () => {
       } else {
         router.push('/signIn');
       }
-    }, 1500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [router]);
