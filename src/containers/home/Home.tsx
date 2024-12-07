@@ -8,22 +8,49 @@ import Modal from '@/containers/home/Modal';
 import { useRouter, usePathname } from 'next/navigation';
 import { useHotkeys } from 'react-hotkeys-hook';
 import encrypt from '@/lib/encrypt';
+import axios from 'axios';
+import AuthModal from './AuthModal';
 
 const Home = () => {
   const router = useRouter();
   const pathname = usePathname();
 
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 참여 모달
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [tempKeyboard, setTempKeyBoard] = useState(false); // 토글만
   const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
+  const [userId, setUserId] = useState<string | null>('');
 
   useEffect(() => {
     if (window.localStorage.getItem('shortcut') === 'true') {
       setTempKeyBoard(true);
       setIsKeyBoard(true);
     }
+    if (window.localStorage.getItem('user_id')) {
+      setUserId(window.localStorage.getItem('user_id'));
+    }
   }, []);
+
+  const getUser = async () => {
+    try {
+      const response = await axios.post(`/api/user`, { user_id: userId });
+      console.log('res:', response);
+      if (response.status === 200) {
+        window.localStorage.setItem('user_name', response.data.user_name);
+      } else {
+        console.log('Failed to get user name', response);
+      }
+    } catch (err) {
+      console.error('Failed to get user name', err);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      getUser();
+    }
+  }, [userId]);
 
   // 회의 생성
   const handleCreateMeeting = async () => {
@@ -43,8 +70,18 @@ const Home = () => {
   // 회의 참가 단축키: 2
   useHotkeys('2', handleOpenModal, { enabled: isKeyboard });
 
+  // 참가 모달 닫기
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenAuthModal = () => {
+    setIsAuthModalOpen(prev => !prev);
+  };
+
+  // 유저 모달 닫기
+  const handleCloseAuthModal = () => {
+    setIsAuthModalOpen(false);
   };
 
   // 단축키 토글
@@ -95,6 +132,8 @@ const Home = () => {
   return (
     <>
       {isModalOpen && <Modal onClose={handleCloseModal} />}
+      {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} />}
+
       <div
         id="container"
         className="flex h-full w-full flex-row items-center justify-center"

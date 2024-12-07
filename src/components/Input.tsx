@@ -1,7 +1,7 @@
 interface InputProps {
   placeholder?: string;
   type?: string;
-  defaultValue?: string;
+  defaultValue?: string | null;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClick?: () => void;
   className?: string;
@@ -26,7 +26,7 @@ const Input: React.FC<InputProps> = ({
       <input
         type={type}
         placeholder={placeholder}
-        defaultValue={defaultValue}
+        defaultValue={defaultValue ?? ''}
         onChange={onChange}
         disabled={disabled}
         {...props}
