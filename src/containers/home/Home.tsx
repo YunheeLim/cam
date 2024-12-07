@@ -59,16 +59,10 @@ const Home = () => {
     router.push(`preview/${meetingId}?type=new`);
   };
 
-  // 회의 생성 단축키: 1
-  useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard });
-
   // 회의 참가
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
-
-  // 회의 참가 단축키: 2
-  useHotkeys('2', handleOpenModal, { enabled: isKeyboard });
 
   // 참가 모달 닫기
   const handleCloseModal = () => {
@@ -95,8 +89,11 @@ const Home = () => {
     localStorage.setItem('shortcut', JSON.stringify(tempKeyboard));
   };
 
-  // 단축키 설정 저장 단축키: s
-  useHotkeys('s', saveKeyboard);
+  useHotkeys('left', () => router.back(), { enabled: isKeyboard }); // 뒤로가기
+  useHotkeys('1', handleCreateMeeting, { enabled: isKeyboard }); // 회의 생성
+  useHotkeys('2', handleOpenModal, { enabled: isKeyboard }); // 회의 참가
+  useHotkeys('esc', handleCloseModal, { enabled: isKeyboard }); // 참가 모달 닫기
+  useHotkeys('s', saveKeyboard); // 단축키 설정 저장
 
   // 시간
   useEffect(() => {

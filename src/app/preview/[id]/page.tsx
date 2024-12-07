@@ -193,11 +193,10 @@ const Preview = () => {
     router.push(`/meeting/${sessionId}?nickName=${nickName ?? userName}`);
   };
 
-  useHotkeys('enter', handleJoinClick, {
-    enabled: isShortcut,
-  });
-
-  useHotkeys('left', () => router.back(), { enabled: isShortcut });
+  useHotkeys('left', () => router.back(), { enabled: isShortcut }); // 뒤로가기
+  useHotkeys('enter', handleJoinClick, { enabled: isShortcut }); // 참가
+  useHotkeys('c', handleCameraClick, { enabled: isShortcut }); // 비디오 토글
+  useHotkeys('m', handleMicClick, { enabled: isShortcut }); // 오디오 토글
 
   return (
     <div

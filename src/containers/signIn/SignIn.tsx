@@ -9,6 +9,7 @@ import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import axios from 'axios';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import Toast from '@/components/Toast';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const SignIn = () => {
   const router = useRouter();
@@ -58,6 +59,8 @@ const SignIn = () => {
       }
     }
   };
+
+  useHotkeys('enter', handleSignIn);
 
   useEffect(() => {
     if (popUp) {

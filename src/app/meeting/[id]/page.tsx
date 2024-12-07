@@ -130,7 +130,7 @@ const Meeting = () => {
     } else {
       console.log('리로드');
       window.sessionStorage.removeItem('firstLoadDone');
-      router.replace('/');
+      router.replace('/home');
     }
 
     // 단축키 설정 정보
@@ -693,20 +693,22 @@ const Meeting = () => {
     };
   }, [text]);
 
-  // 화면 캡쳐 및 ocr 단축키
-  useHotkeys('ctrl+o', handleCapture, { enabled: isShortcut });
-
   // 회의 나가기 버튼 클릭
   const handleExitClick = () => {
     setIsModalOpen(true);
   };
 
+  // 회의 나가기 모달 닫기
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  // 회의 나가기
-  useHotkeys('ctrl+q', handleExitClick, { enabled: isShortcut });
+  useHotkeys('c', handleCameraClick, { enabled: isShortcut }); // 비디오 토글
+  useHotkeys('m', handleMicClick, { enabled: isShortcut }); // 오디오 토글
+  useHotkeys('s', handleMicClick, { enabled: isShortcut }); // 스피커 토글
+  useHotkeys('r', handleCapture, { enabled: isShortcut }); // 공유 화면 읽기 토글
+  useHotkeys('q', handleExitClick, { enabled: isShortcut }); // 회의 나가기
+  useHotkeys('left', () => router.back(), { enabled: isShortcut }); // 뒤로가기
 
   // tts 언어 한 개 or 두 개 감지 테스트
   // useEffect(() => {
