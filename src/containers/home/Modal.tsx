@@ -77,7 +77,7 @@ const Modal: React.FC<ModalProps> = ({ onClose }) => {
         <div className="mt-4 flex flex-grow flex-col items-center justify-between">
           <div className="flex w-full flex-col">
             <Input onChange={handleChange} placeholder="회의 ID" />
-            <div className=" px-2 text-sm font-medium text-red-500">
+            <div className="px-2 text-sm font-medium text-red-500">
               {warning}
             </div>
           </div>

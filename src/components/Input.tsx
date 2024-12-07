@@ -1,5 +1,6 @@
 interface InputProps {
   placeholder?: string;
+  type?: string;
   defaultValue?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClick?: () => void;
@@ -11,6 +12,7 @@ interface InputProps {
 
 const Input: React.FC<InputProps> = ({
   placeholder,
+  type,
   defaultValue,
   onChange,
   onClick,
@@ -22,7 +24,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className={`relative w-full`}>
       <input
-        type="text"
+        type={type}
         placeholder={placeholder}
         defaultValue={defaultValue}
         onChange={onChange}
