@@ -15,7 +15,7 @@ export function TopBar() {
       } `}
     >
       <div
-        onClick={() => router.push('/')}
+        onClick={() => router.push('/home')}
         className="flex cursor-pointer items-center"
       >
         <Logo width={30} height={30} />
