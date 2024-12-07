@@ -443,6 +443,17 @@ const Meeting = () => {
                 console.log('User pressed the "Stop sharing" button');
                 sessionScreen.unpublish(publisher);
                 setMainStreamManager(undefined);
+                setIsOcrOn(false);
+                prevFrameData.current = null;
+                window.speechSynthesis.cancel();
+                changeDetected.current = false; // Use useRef for changeDetected
+                setIsReading(false);
+                // Cleanup requestAnimationFrame on component unmount
+                if (intervalIdRef.current) {
+                  console.log('========cleanup 1=========');
+                  clearInterval(intervalIdRef.current);
+                  intervalIdRef.current = null; // Clear the interval ID
+                }
               });
             sessionScreen.publish(publisher);
             setScreenSession(sessionScreen);
@@ -485,7 +496,7 @@ const Meeting = () => {
     setPublisher(undefined);
     setScreenPublisher(undefined);
 
-    router.push('/');
+    router.push('/home');
   };
 
   const getToken = async () => {
