@@ -6,8 +6,9 @@ export async function POST(req: NextRequest) {
   try {
     const requestBody = await req.json();
     const { user_id, user_email, user_name, user_password } = requestBody;
+    console.log('asdfasdfadsf', user_id, user_email, user_name);
 
-    if (!user_id || !user_email || !user_name || !user_password) {
+    if (!user_id || !user_email || !user_name) {
       return NextResponse.json(
         { error: '필수 필드가 누락되었습니다.' },
         { status: 400 },
@@ -19,7 +20,6 @@ export async function POST(req: NextRequest) {
       user_id,
       user_email,
       user_name,
-      user_password,
       createdAt: new Date(),
     });
 

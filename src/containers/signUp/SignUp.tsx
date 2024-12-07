@@ -110,6 +110,7 @@ const SignUp = () => {
             user_id: id,
             user_email: email,
             user_name: name,
+            user_password: pw,
           });
           console.log('res:', response);
           if (response.status === 200) {

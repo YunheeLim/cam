@@ -5,6 +5,7 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const SignIn = () => {
   const router = useRouter();
@@ -31,6 +32,13 @@ const SignIn = () => {
     }
     if (!pw) {
       setWarningPw('비밀번호를 입력해주세요.');
+    }
+    if (id && pw && !warningId && !warningPw) {
+      try {
+        const response = axios.post('/api/signIn', { user_id: id });
+      } catch (err) {
+        console.error('Failed to sign in', err);
+      }
     }
   };
 
