@@ -5,6 +5,7 @@ import Input from '@/components/Input';
 import Button from '@/components/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 import axios from 'axios';
 
 const SignIn = () => {
@@ -13,6 +14,7 @@ const SignIn = () => {
   const [pw, setPw] = useState('');
   const [warningId, setWarningId] = useState('');
   const [warningPw, setWarningPw] = useState('');
+  const [isPw, setIsPw] = useState(false); // 비밀번호 보기
 
   // 아이디 입력
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +28,7 @@ const SignIn = () => {
     setWarningId('');
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!id) {
       setWarningId('아이디를 입력해주세요.');
     }
@@ -35,7 +37,16 @@ const SignIn = () => {
     }
     if (id && pw && !warningId && !warningPw) {
       try {
-        const response = axios.post('/api/signIn', { user_id: id });
+        const response = await axios.post('/api/signIn', {
+          user_id: id,
+          user_password: pw,
+        });
+        console.log('res:', response);
+        if (response.status === 200) {
+          router.push('/home');
+        } else {
+          console.log('Failed to sign in', response);
+        }
       } catch (err) {
         console.error('Failed to sign in', err);
       }
@@ -64,13 +75,27 @@ const SignIn = () => {
               {warningId ?? ''}
             </div>
           </div>
-          <div className="flex w-full flex-col ">
-            <Input
-              onChange={handlePwChange}
-              type="password"
-              placeholder="비밀번호"
-            />
-            <div className=" px-2 text-sm font-medium text-red-500">
+          <div className="flex w-full flex-col">
+            <div className="relative flex items-center">
+              <Input
+                onChange={handlePwChange}
+                placeholder="비밀번호"
+                type={isPw ? 'text' : 'password'}
+                className="w-full"
+              />
+              <div
+                onClick={() => setIsPw(prev => !prev)}
+                className="absolute right-2 flex h-full items-center"
+              >
+                {isPw ? (
+                  <IoEyeOutline size={24} color="#8c8c8c" />
+                ) : (
+                  <IoEyeOffOutline size={24} color="#8c8c8c" />
+                )}
+              </div>
+            </div>
+
+            <div className="px-2 text-sm font-medium text-red-500">
               {warningPw ?? ''}
             </div>
           </div>

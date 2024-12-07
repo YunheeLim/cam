@@ -1,34 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collection, addDoc, Firestore } from 'firebase/firestore';
-import db from '../../../../firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import db from '../../../../firebase/firestore'; // Firestore 초기화 파일
 
 export async function POST(req: NextRequest) {
   try {
+    // 요청 본문에서 데이터 추출
     const requestBody = await req.json();
-    const { user_id, user_email, user_name, user_password } = requestBody;
-    console.log('asdfasdfadsf', user_id, user_email, user_name);
+    const { user_id, user_password } = requestBody;
 
-    if (!user_id || !user_email || !user_name) {
+    console.log('로그인 시도:', user_id, user_password);
+
+    if (!user_id || !user_password) {
       return NextResponse.json(
-        { error: '필수 필드가 누락되었습니다.' },
+        { error: '아이디와 비밀번호를 입력하세요.' },
         { status: 400 },
       );
     }
 
-    // Firestore에 데이터 추가
-    const docRef = await addDoc(collection(db, 'users'), {
-      user_id,
-      user_email,
-      user_name,
-      createdAt: new Date(),
+    // Firestore에서 사용자 검색
+    const usersCollection = collection(db, 'users');
+    const q = query(usersCollection, where('user_id', '==', user_id));
+    const querySnapshot = await getDocs(q);
+
+    console.log('querySnapshot: ', querySnapshot);
+
+    if (querySnapshot.empty) {
+      return NextResponse.json(
+        { error: '해당 아이디가 존재하지 않습니다.' },
+        { status: 404 },
+      );
+    }
+
+    let userFound = false;
+
+    querySnapshot.forEach(doc => {
+      const userData = doc.data();
+      if (userData.user_password === user_password) {
+        userFound = true;
+      }
     });
 
-    return NextResponse.json(
-      { message: '회원가입 저장 성공', docId: docRef.id },
-      { status: 200 },
-    );
+    if (!userFound) {
+      return NextResponse.json(
+        { error: '비밀번호가 일치하지 않습니다.' },
+        { status: 401 },
+      );
+    }
+
+    // 로그인 성공 응답
+    return NextResponse.json({ message: '로그인 성공' }, { status: 200 });
   } catch (err) {
-    console.error('데이터 저장 실패:', err);
+    console.error('로그인 실패:', err);
     return NextResponse.json({ error: '서버 오류' }, { status: 500 });
   }
 }

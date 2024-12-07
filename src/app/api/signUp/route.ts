@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: '회원가입 저장 성공', docId: docRef.id },
+      { message: '회원가입 성공', docId: docRef.id },
       { status: 200 },
     );
   } catch (err) {
