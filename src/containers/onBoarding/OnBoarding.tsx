@@ -10,7 +10,11 @@ const OnBoarding = () => {
   useEffect(() => {
     // 1.5초 뒤 페이지 이동
     const timer = setTimeout(() => {
-      router.push('/signIn'); // 이동할 페이지 경로
+      if (window.localStorage.getItem('user_id')) {
+        router.push('/home');
+      } else {
+        router.push('/signIn');
+      }
     }, 1500);
 
     return () => clearTimeout(timer);
