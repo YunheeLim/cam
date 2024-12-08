@@ -10,6 +10,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import encrypt from '@/lib/encrypt';
 import axios from 'axios';
 import AuthModal from './AuthModal';
+import Toast from '@/components/Toast';
 
 const Home = () => {
   const router = useRouter();
@@ -21,6 +22,7 @@ const Home = () => {
   const [tempKeyboard, setTempKeyBoard] = useState(false); // 토글만
   const [isKeyboard, setIsKeyBoard] = useState(false); // 저장
   const [userId, setUserId] = useState<string | null>('');
+  const [isToast, setIsToast] = useState(false);
 
   useEffect(() => {
     if (window.localStorage.getItem('shortcut') === 'true') {
@@ -85,6 +87,7 @@ const Home = () => {
 
   // 단축키 설정 저장
   const saveKeyboard = () => {
+    setIsToast(true);
     setIsKeyBoard(tempKeyboard);
     localStorage.setItem('shortcut', JSON.stringify(tempKeyboard));
   };
@@ -126,10 +129,29 @@ const Home = () => {
   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes; // Add leading zero if needed
   const formattedTime = `${formattedHours} : ${formattedMinutes} ${ampm}`;
 
+  // Auto-close toast after 3 seconds
+  useEffect(() => {
+    if (isToast) {
+      const timer = setTimeout(() => {
+        setIsToast(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isToast]);
+
   return (
     <>
       {isModalOpen && <Modal onClose={handleCloseModal} />}
       {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} />}
+      {isToast && (
+        <Toast
+          message={'단축키 설정이 저장되었습니다.'}
+          onClose={() => {
+            setIsToast(false);
+          }}
+        />
+      )}
 
       <div
         id="container"
