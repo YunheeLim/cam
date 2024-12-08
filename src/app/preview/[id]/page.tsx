@@ -199,86 +199,90 @@ const Preview = () => {
   useHotkeys('m', handleMicClick, { enabled: isShortcut }); // 오디오 토글
 
   return (
-    <div
-      onClick={handleBackgroundClick}
-      className="relative flex w-full flex-col items-center px-6"
-    >
-      <div className="absolute top-1/20 flex w-full max-w-515 flex-col items-center">
-        <h1 className="text-4xl font-bold text-primary">미리 보기</h1>
-        <p className="mb-10 mt-2 text-primary">비디오와 오디오를 설정하세요</p>
-        <Video
-          width={'full'}
-          height={'h-80'}
-          videoRef={videoRef}
-          isCameraOn={isCameraOn}
-          isMicOn={isMicOn}
-          nickName={nickName}
-          userName={userName}
-        />
+    <>
+      <div
+        onClick={handleBackgroundClick}
+        className="relative flex w-full flex-col items-center px-6"
+      >
+        <div className="absolute top-1/20 flex w-full max-w-515 flex-col items-center">
+          <h1 className="text-4xl font-bold text-primary">미리 보기</h1>
+          <p className="mb-10 mt-2 text-primary">
+            비디오와 오디오를 설정하세요
+          </p>
+          <Video
+            width={'full'}
+            height={'h-80'}
+            videoRef={videoRef}
+            isCameraOn={isCameraOn}
+            isMicOn={isMicOn}
+            nickName={nickName}
+            userName={userName}
+          />
 
-        <div
-          className="my-6 flex w-full flex-row justify-between"
-          onClick={handleBackgroundClick}
-        >
-          <div className="flex gap-4" onClick={handleBackgroundClick}>
-            <div className="relative" onClick={handleBackgroundClick}>
-              <Control
-                name={'camera'}
-                OnClick={handleCameraClick}
-                OnMoreClick={handleVideoListClick}
-              >
-                {isCameraOn ? <CameraOn /> : <CameraOff />}
-              </Control>
-              {isVideoListOpen && (
-                <DeviceModal
-                  page={'preview'}
-                  list={videoDevices}
-                  selectedDeviceId={selectedVideoDeviceId}
-                  prevDeviceId={prevVideoDeviceId}
-                  onSetPrevDeviceId={setPrevVideoDeviceId}
-                  onSetSelectedDeviceId={setSelectedVideoDeviceId}
-                  onSetIsNewStream={setIsNewStream}
-                  onClose={() => setIsVideoListOpen(false)}
-                />
-              )}
-            </div>
+          <div
+            className="my-6 flex w-full flex-row justify-between"
+            onClick={handleBackgroundClick}
+          >
+            <div className="flex gap-4" onClick={handleBackgroundClick}>
+              <div className="relative" onClick={handleBackgroundClick}>
+                <Control
+                  name={'camera'}
+                  OnClick={handleCameraClick}
+                  OnMoreClick={handleVideoListClick}
+                >
+                  {isCameraOn ? <CameraOn /> : <CameraOff />}
+                </Control>
+                {isVideoListOpen && (
+                  <DeviceModal
+                    page={'preview'}
+                    list={videoDevices}
+                    selectedDeviceId={selectedVideoDeviceId}
+                    prevDeviceId={prevVideoDeviceId}
+                    onSetPrevDeviceId={setPrevVideoDeviceId}
+                    onSetSelectedDeviceId={setSelectedVideoDeviceId}
+                    onSetIsNewStream={setIsNewStream}
+                    onClose={() => setIsVideoListOpen(false)}
+                  />
+                )}
+              </div>
 
-            <div className="relative" onClick={handleBackgroundClick}>
-              <Control
-                name={'mic'}
-                OnClick={handleMicClick}
-                OnMoreClick={handleAudioListClick}
-              >
-                {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
-              </Control>
-              {isAudioListOpen && (
-                <DeviceModal
-                  page={'preview'}
-                  list={audioDevices}
-                  selectedDeviceId={selectedAudioDeviceId}
-                  prevDeviceId={prevAudioDeviceId}
-                  onSetPrevDeviceId={setPrevAudioDeviceId}
-                  onSetSelectedDeviceId={setSelectedAudioDeviceId}
-                  onSetIsNewStream={setIsNewStream}
-                  onClose={() => setIsAudioListOpen(false)}
-                />
-              )}
+              <div className="relative" onClick={handleBackgroundClick}>
+                <Control
+                  name={'mic'}
+                  OnClick={handleMicClick}
+                  OnMoreClick={handleAudioListClick}
+                >
+                  {isMicOn ? <MicOn /> : <MicOff width={32} height={32} />}
+                </Control>
+                {isAudioListOpen && (
+                  <DeviceModal
+                    page={'preview'}
+                    list={audioDevices}
+                    selectedDeviceId={selectedAudioDeviceId}
+                    prevDeviceId={prevAudioDeviceId}
+                    onSetPrevDeviceId={setPrevAudioDeviceId}
+                    onSetSelectedDeviceId={setSelectedAudioDeviceId}
+                    onSetIsNewStream={setIsNewStream}
+                    onClose={() => setIsAudioListOpen(false)}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex w-full flex-row gap-4">
-          <Input
-            placeholder="사용할 이름을 입력해주세요"
-            defaultValue={userName}
-            onChange={handleChange}
-            className="basis-3/4"
-          />
-          <Button onClick={handleJoinClick} className="basis-1/4">
-            참가
-          </Button>
+          <div className="flex w-full flex-row gap-4">
+            <Input
+              placeholder="사용할 이름을 입력해주세요"
+              defaultValue={userName}
+              onChange={handleChange}
+              className="basis-3/4"
+            />
+            <Button onClick={handleJoinClick} className="basis-1/4">
+              참가
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
