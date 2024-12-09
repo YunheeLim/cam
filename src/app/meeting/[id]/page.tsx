@@ -431,7 +431,7 @@ const Meeting = () => {
             'html-element-id',
             {
               videoSource: 'screen',
-              publishAudio: false,
+              publishAudio: true,
             },
           );
 
