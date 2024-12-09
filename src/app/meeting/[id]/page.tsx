@@ -431,7 +431,8 @@ const Meeting = () => {
             'html-element-id',
             {
               videoSource: 'screen',
-              publishAudio: true,
+              audioSource: undefined, // 기본 오디오 소스를 포함
+              publishAudio: true, // 오디오도 공유
             },
           );
 
